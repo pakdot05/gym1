@@ -97,6 +97,7 @@
                         <li><a class="dropdown-item" href="profile.php">Profile</a></li>
                         <li><a class="dropdown-item" href="appointment.php">Booking</a></li>
                         <li><a class="dropdown-item" href="subscribed.php">Subscribe</a></li>
+                        <li><a class="dropdown-item" href="order.php">Order</a></li>
                         <li><a class="dropdown-item" href="logout.php">Logout</a></li>
                         </ul>
                     </div>

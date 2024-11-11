@@ -12,7 +12,7 @@ if (isset($_GET['search'])) {
 
 // Fetch orders from the database with optional search filtering
 $query = "SELECT o.order_id, o.product_name, o.quantity, o.payment_status, 
-                 o.address, u.name AS user_name, o.payment_method, o.price
+                 o.address, u.name AS user_name, o.payment_method, o.price ,o.claimed
           FROM orders o
           JOIN user_cred u ON o.user_id = u.user_id";
 
@@ -37,7 +37,25 @@ if ($stmt = $con->prepare($query)) {
 } else {
     die("Error fetching orders: " . $con->error);
 }
-
+// Check for orders that are 3 days old and unpaid, then cancel them
+foreach ($orders as $order) {
+    if ($order['payment_status'] === 'Pending' && strtotime($order['order_date']) < strtotime('-3 days')) {
+        // Cancel the order and update the product quantity
+        $updateQuery = "UPDATE orders SET payment_status = 'Cancelled' WHERE order_id = ?";
+        if ($stmt = $con->prepare($updateQuery)) {
+            $stmt->bind_param("i", $order['order_id']);
+            $stmt->execute();
+            $stmt->close();
+        }
+      // Update product quantity
+      $updateProductQuery = "UPDATE products SET quantity = quantity + ? WHERE product_name = ?";
+      if ($stmt = $con->prepare($updateProductQuery)) {
+          $stmt->bind_param("is", $order['quantity'], $order['product_name']);
+          $stmt->execute();
+          $stmt->close();
+      }
+  }
+}
 // Handle AJAX request for search
 if (isset($_GET['ajax_search'])) {
     if (count($orders) > 0) {
@@ -53,17 +71,28 @@ if (isset($_GET['ajax_search'])) {
                     <td>{$order['payment_status']}</td>
                     <td>";
 
-            // Claim button will always be displayed, and change to 'Claimed' upon payment
-            if ($order['payment_status'] === 'Paid') {
-                echo "<button class='btn btn-success btn-sm' disabled>Claimed</button>";
-            } else {
-                echo "<button class='btn btn-primary btn-sm' data-bs-toggle='modal' data-bs-target='#paymentModal'
-                        data-order-id='{$order['order_id']}' 
-                        data-price='{$order['price']}'>
-                        Claim
-                      </button>";
-            }
-
+                    if ($order['payment_status'] === 'Paid' && $order['claimed'] == 0) {
+                        // Display claimant modal for paid but unclaimed orders
+                        echo "<button class='btn btn-primary btn-sm' data-bs-toggle='modal' data-bs-target='#claimNameModal'
+                                data-order-id='{$order['order_id']}'>
+                                Claim
+                              </button>";
+                    } elseif ($order['payment_status'] === 'Paid' && $order['claimed'] == 1) {
+                        // Disable button if claimed
+                        echo "<button class='btn btn-success btn-sm' disabled>Claimed</button>";
+                    } elseif ($order['payment_status'] === 'Cancelled') {
+                        // Disable button if cancelled
+                        echo "<button class='btn btn-secondary btn-sm' disabled>Cancelled</button>";
+                    } else {
+                        // Open payment modal for unpaid orders
+                        echo "<button class='btn btn-primary btn-sm' data-bs-toggle='modal' data-bs-target='#paymentModal'
+                                data-order-id='{$order['order_id']}' 
+                                data-price='{$order['price']}'>
+                                Claim
+                              </button>";
+                    }
+                    
+                    
             // Always display the delete button
             echo "
                 <form method='post' action='product_sales.php' onsubmit='return confirm(\"Are you sure you want to delete this order?\");'>
@@ -109,6 +138,30 @@ if (isset($_POST['order_id']) && isset($_POST['amount'])) {
     }
     exit();
 }
+if (isset($_POST['order_id']) && isset($_POST['claimant_name'])) {
+    $order_id = (int)$_POST['order_id'];
+    $claimant_name = $con->real_escape_string(trim($_POST['claimant_name']));
+
+    // Ensure that the claimant_name is not empty
+    if (!empty($claimant_name)) {
+        // Update the order to mark it as claimed and save the claimant's name (if necessary)
+        $updateQuery = "UPDATE orders SET claimed = 1, user_name = ? WHERE order_id = ?";
+        if ($stmt = $con->prepare($updateQuery)) {
+            $stmt->bind_param("si", $claimant_name, $order_id);
+            if ($stmt->execute()) {
+                echo "Claim updated successfully!";
+            } else {
+                echo "Error updating claim: " . $stmt->error;
+            }
+            $stmt->close();
+        } else {
+            echo "Error preparing update query: " . $con->error;
+        }
+    } else {
+        echo "Claimant name is required.";
+    }
+    exit();
+}
 
 // If delete action is triggered
 if (isset($_POST['delete_order'])) {
@@ -142,33 +195,34 @@ if (isset($_POST['delete_order'])) {
 
     <!-- AJAX for live search -->
     <script>
-        function search_user(query) {
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", "product_sales.php?ajax_search=1&search=" + query, true);
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState == 4 && xhr.status == 200) {
-                    document.getElementById("ordersTableBody").innerHTML = xhr.responseText;
-                }
-            };
-            xhr.send();
-        }
-
         document.addEventListener('DOMContentLoaded', function () {
-    var orderIdToPay;
-    var totalPrice;
+    var orderIdToPay, totalPrice, orderIdToClaim;
 
-    // Payment Modal - Set order data
+    // AJAX search function
+    function search_user(query) {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "product_sales.php?ajax_search=1&search=" + query, true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                document.getElementById("ordersTableBody").innerHTML = xhr.responseText;
+            }
+        };
+        xhr.send();
+    }
+
+    // Payment Modal
     var paymentModal = document.getElementById('paymentModal');
     paymentModal.addEventListener('show.bs.modal', function (event) {
         var button = event.relatedTarget;
         orderIdToPay = button.getAttribute('data-order-id');
         totalPrice = parseFloat(button.getAttribute('data-price'));
+
         document.getElementById('paymentPrice').innerText = totalPrice.toFixed(2);
         document.getElementById('changeDisplay').style.display = 'none'; // Hide change display initially
         document.getElementById('receivedAmount').value = ''; // Clear previous input
     });
 
-    // Change display based on received amount
+    // Display change based on received amount in Payment Modal
     document.getElementById('receivedAmount').addEventListener('input', function () {
         var receivedAmount = parseFloat(this.value);
         if (!isNaN(receivedAmount) && receivedAmount >= totalPrice) {
@@ -180,7 +234,7 @@ if (isset($_POST['delete_order'])) {
         }
     });
 
-    // Confirm Payment Button Action
+    // Confirm Payment
     document.getElementById('confirmPaymentButton').addEventListener('click', function () {
         var receivedAmount = parseFloat(document.getElementById('receivedAmount').value);
         if (isNaN(receivedAmount) || receivedAmount < totalPrice) {
@@ -193,14 +247,44 @@ if (isset($_POST['delete_order'])) {
         xhr.open("POST", "product_sales.php", true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4 && xhr.status == 200) {
+            if (xhr.readyState === 4 && xhr.status === 200) {
                 location.reload(); // Reload page after payment
             }
         };
         xhr.send("order_id=" + orderIdToPay + "&amount=" + receivedAmount);
     });
+
+    // Claim Name Modal
+    var claimNameModal = document.getElementById('claimNameModal');
+    claimNameModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        orderIdToClaim = button.getAttribute('data-order-id');
+        document.getElementById('claimantName').value = ''; // Clear previous input
+    });
+
+    // Confirm Claim
+    document.getElementById('confirmClaimButton').addEventListener('click', function () {
+        var claimantName = document.getElementById('claimantName').value.trim();
+        if (claimantName === '') {
+            alert('Please enter a valid name.');
+            return;
+        }
+
+        // Send AJAX request to claim order with claimant's name
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "product_sales.php", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                location.reload(); // Reload page after claiming
+            }
+        };
+        xhr.send("order_id=" + orderIdToClaim + "&claimant_name=" + encodeURIComponent(claimantName));
+    });
 });
 
+       </script>
+    
     </script>
 </head>
 <body class="bg-light">
@@ -236,8 +320,8 @@ if (isset($_POST['delete_order'])) {
                         <thead class="sticky-top">
                             <tr class="bg-dark text-light">
                                 <th scope="col">#</th>
-                                <th scope="col">Product</th>
-                                <th scope="col">Name</th>
+                                <th scope="col">Product Name</th>
+                                <th scope="col">Buyer Name</th>
                                 <th scope="col">Quantity</th>
                                 <th scope="col">Price</th>
                                 <th scope="col">Address</th>
@@ -259,18 +343,25 @@ if (isset($_POST['delete_order'])) {
                                     <td><?php echo $order['payment_method']; ?></td>
                                     <td><?php echo $order['payment_status']; ?></td>
                                     <td>
-                                        <?php if ($order['payment_status'] === 'Paid'): ?>
-                                            <button class="btn btn-success btn-sm" disabled>Claimed</button>
+                                    <?php if ($order['payment_status'] === 'Paid' && $order['claimed'] == 0): ?>
+                                            <!-- Paid but unclaimed orders, show Claimant Name modal -->
+                                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#claimNameModal"
+                                                    data-order-id="<?php echo $order['order_id']; ?>">
+                                                Claim
+                                            </button>
+                                        <?php elseif (($order['payment_status'] === 'Paid' && $order['claimed'] == 1) || $order['payment_status'] === 'Cancelled'): ?>
+                                            <!-- Paid and claimed or cancelled orders, show "Claimed" or "Cancelled" button -->
+                                            <button class="btn btn-<?php echo ($order['payment_status'] === 'Paid') ? 'success' : 'secondary'; ?> btn-sm" disabled>
+                                                <?php echo ($order['payment_status'] === 'Paid') ? 'Claimed' : 'Cancelled'; ?>
+                                            </button>
                                         <?php else: ?>
-                                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#paymentModal" 
-                                                    data-order-id="<?php echo $order['order_id']; ?>" 
+                                            <!-- Unpaid orders, show payment modal -->
+                                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#paymentModal"
+                                                    data-order-id="<?php echo $order['order_id']; ?>"
                                                     data-price="<?php echo $order['price']; ?>">
                                                 Claim
                                             </button>
-                                        <?php endif; ?>
-
-                                        <!-- Delete button -->
-                                        <form method="post" action="product_sales.php" onsubmit="return confirm('Are you sure you want to delete this order?');" style="display:inline;">
+                                        <?php endif; ?> <form method="post" action="product_sales.php" onsubmit="return confirm('Are you sure you want to delete this order?');" style="display:inline;">
                                             <input type="hidden" name="order_id" value="<?php echo $order['order_id']; ?>">
                                             <button type="submit" name="delete_order" class="btn btn-danger btn-sm">Delete</button>
                                         </form>
@@ -287,27 +378,47 @@ if (isset($_POST['delete_order'])) {
         </div>
     </div>
 
-    <!-- Payment Modal -->
-    <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="paymentModalLabel">Payment Confirmation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Amount to be paid: <span id="paymentPrice"></span></p>
-                    <p>Enter received amount:</p>
-                    <input type="number" id="receivedAmount" class="form-control" min="0" step="0.01">
-                    <p id="changeDisplay" style="display:none;">Change: <span id="changeAmount"></span></p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="confirmPaymentButton">Confirm Payment</button>
-                </div>
+   <!-- Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="paymentModalLabel">Payment Confirmation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Amount to be paid: <span id="paymentPrice"></span></p>
+                <p>Enter received amount:</p>
+                <input type="number" id="receivedAmount" class="form-control" min="0" step="0.01">
+                <p id="changeDisplay" style="display:none;">Change: <span id="changeAmount"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmPaymentButton">Confirm Payment</button>
             </div>
         </div>
     </div>
+</div>
+
+<!-- Claim Name Modal -->
+<div class="modal fade" id="claimNameModal" tabindex="-1" aria-labelledby="claimNameModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="claimNameModalLabel">Claim Order</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Please enter the name of the person claiming this order:</p>
+                <input type="text" id="claimantName" class="form-control" required>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmClaimButton">Confirm Claim</button>
+            </div>
+        </div>
+    </div>
+</div>
 
     <?php require('inc/scripts.php'); ?>
 

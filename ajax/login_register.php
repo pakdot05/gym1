@@ -9,7 +9,7 @@ if (isset($_POST['register'])) {
     if (!preg_match('/[A-Z]/', $data['pass']) || 
     !preg_match('/[a-z]/', $data['pass']) || 
     !preg_match('/[0-9]/', $data['pass']) || 
-    !preg_match('/[!@#\$%^&*()_+\-=\[\]{};\'":\\|,.<>\/?]/', $data['pass']) || 
+    !preg_match('/[!@#\$%^&*()_+\-=\[\]{};\':"\\|,.<>\/?]/', $data['pass']) || 
     strlen($data['pass']) < 8 || strlen($data['pass']) > 16) {
     echo 'pass_invalid';
     exit;

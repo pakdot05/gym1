@@ -145,6 +145,12 @@
             background-color:#096066;
         }
 
+    .checkout-button[disabled] {
+        background-color: #cccccc;
+        cursor: not-allowed;
+        color: #ffffff;
+    }
+
         /* Responsive Styling */
         @media (max-width: 1200px) {
             .box {
@@ -208,7 +214,19 @@
             } else {
                 $login = 1; // Logged in
             }
+            $query = "SELECT * FROM orders WHERE user_id = ? AND claimed = 0";
 
+            if ($stmt_check = $con->prepare($query)) {
+                $stmt_check->bind_param('i', $user_id);
+                $stmt_check->execute();
+                $result_check = $stmt_check->get_result();
+                
+                // If there are unclaimed products
+                $has_unclaimed = $result_check->num_rows > 0;
+                
+                $stmt_check->close();
+            }
+            
             $search = isset($_GET['search']) ? $_GET['search'] : '';
 
             // SQL query to fetch products
@@ -228,44 +246,48 @@
                 // Check if there are any matching products
                 if ($result->num_rows > 0) {
                     while ($fetch_products = $result->fetch_assoc()) {
+                        $is_sold_out = $fetch_products['quantity'] <= 0;
+                        
                         ?>
-                        <form action="checkout.php" method="post" class="box checkout-form">
-                            <input type="hidden" name="pid" value="<?=$fetch_products['id'];?>">
-                            <input type="hidden" name="name" value="<?=$fetch_products['name'];?>">
-                            <input type="hidden" name="price" value="<?=$fetch_products['price'];?>">
-                            <input type="hidden" name="image" value="<?=$fetch_products['image'];?>">
+                         <form action="checkout.php" method="post" class="box checkout-form">
+                    <input type="hidden" name="pid" value="<?=$fetch_products['id'];?>">
+                    <input type="hidden" name="name" value="<?=$fetch_products['name'];?>">
+                    <input type="hidden" name="price" value="<?=$fetch_products['price'];?>">
+                    <input type="hidden" name="image" value="<?=$fetch_products['image'];?>">
 
-                            <!-- Display product image -->
-                            <img src="images/<?=$fetch_products['image'];?>" alt="<?=$fetch_products['name'];?>" class="product-image">
-                            
-                            <!-- Display product name -->
-                            <div class="name text-center"><?=$fetch_products['name'];?></div>
-                            
-                            <!-- Display available quantity -->
-                            <div class="quantity-display text-center">Available: <?=$fetch_products['quantity'];?></div>
+                    <div class="sold-out-overlay" style="<?= $is_sold_out ? '' : 'display:none;' ?>">
+                        <!-- Overlay is only displayed if the product is sold out -->
+                    </div>
 
-                            <!-- Display price and quantity input -->
-                            <div class="flex">
-                                <div class="price"><span style="color: red;">₱</span><?=$fetch_products['price'];?></div>
-                                <input type="number" name="qty" class="qty" min="1" max="<?=$fetch_products['quantity'];?>" value="1">
-                            </div>
-                            
-                            <!-- Checkout Button -->
-                            <button type="submit" class="checkout-button" data-login="<?=$login;?>">Checkout</button>
-                        </form>
-                        <?php
-                    }
-                } else {
-                    echo '<p class="empty">No Products Found!</p>';
-                }
-
-                // Close the statement
-                $stmt->close();
-            } else {
-                echo "Error: Could not prepare SQL statement.";
+                    <img src="images/<?=$fetch_products['image'];?>" alt="<?=$fetch_products['name'];?>" class="product-image">
+                    <div class="name text-center"><?=$fetch_products['name'];?></div>
+                    <div class="quantity-display text-center">Available: <?=$fetch_products['quantity'];?></div>
+                    <div class="flex">
+                        <div class="price"><span style="color: red;">₱</span><?=$fetch_products['price'];?></div>
+                        <input type="number" name="qty" class="qty" min="1" max="<?=$fetch_products['quantity'];?>" value="1" <?= $is_sold_out ? 'disabled' : ''; ?>>
+                    </div>
+                    <button type="submit" 
+        class="checkout-button" 
+        data-login="<?= $login; ?>" 
+        data-unclaimed="<?= $has_unclaimed ? 'true' : 'false'; ?>"
+        <?= $is_sold_out ? 'disabled' : ''; ?>>
+        <?= $is_sold_out ? 'Sold Out' : 'Checkout'; ?>
+    </button>
+                </form>
+                <?php
             }
+        } else {
+            echo '<p class="empty">No Products Found!</p>';
         }
+        $stmt->close();
+    } else {
+        echo "Error: Could not prepare SQL statement.";
+    }
+}
+
+
         ?>
+        
     </div>
 </div>
 
@@ -322,24 +344,40 @@
                 emptyMessage.style.display = 'block';
             }
         }
-
         document.addEventListener('DOMContentLoaded', function () {
-    const checkoutButtons = document.querySelectorAll('.checkout-button');
+    const checkoutForms = document.querySelectorAll('.checkout-form');
 
-    checkoutButtons.forEach(button => {
-        button.addEventListener('click', function (e) {
-            // Get the login status from the data-login attribute
-            const isLoggedIn = this.getAttribute('data-login');
+    checkoutForms.forEach(form => {
+        form.addEventListener('submit', function (e) {
+            const checkoutButton = form.querySelector('.checkout-button');
+            const isLoggedIn = checkoutButton.getAttribute('data-login');
+            const hasUnclaimed = checkoutButton.getAttribute('data-unclaimed') === 'true';
 
-            // If the login status is undefined or 0, show an alert and prevent form submission
+            // If the user is not logged in, show the login modal
             if (isLoggedIn === '0' || isLoggedIn === null) {
-                e.preventDefault();  // Prevent the form from submitting
-                alert('Please log in first to proceed with checkout.');  // Show the correct alert message
+                e.preventDefault(); // Prevent form submission
+                var loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+                loginModal.show();
+                return; // Stop further execution
             }
-            // If the user is logged in (isLoggedIn is '1'), allow checkout (form submission will continue)
+
+            // If there are unclaimed products, display a validation alert and prevent checkout
+            if (hasUnclaimed) {
+                e.preventDefault();
+                alert('You cannot proceed to checkout with unclaimed products. Please claim them first.');
+                return; // Stop further execution
+            }
+
+            // If button is disabled (sold out), show validation
+            if (checkoutButton.disabled) {
+                e.preventDefault(); // Prevent form submission
+                alert('Product is out of stock.');
+                return; // Stop further execution
+            }
         });
     });
 });
+
 
     </script>
 

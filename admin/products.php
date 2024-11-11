@@ -1,4 +1,5 @@
 <?php
+
 require('inc/essentials.php');
 
 $db_host = "localhost";
@@ -62,6 +63,33 @@ if(isset($_GET['delete'])){
    header('location:products.php');
 }
 
+if(isset($_GET['update'])){
+    $update_id = $_GET['update'];
+    $select_product = $conn->prepare("SELECT * FROM `products` WHERE id = ?");
+    $select_product->execute([$update_id]);
+    $product = $select_product->fetch(PDO::FETCH_ASSOC);
+}
+
+if(isset($_POST['update_product'])){
+    $update_id = $_POST['update_id']; // Get the product ID from the hidden field
+    $name = $_POST['name'];
+    $price = $_POST['price'];
+    $quantity = $_POST['quantity'];
+    $image = $_FILES['image']['name'];
+    $image_tmp_name = $_FILES['image']['tmp_name'];
+    $image_folder = '../images/'.$image;
+
+    if(!empty($image)){
+        move_uploaded_file($image_tmp_name, $image_folder);
+        $update_product = $conn->prepare("UPDATE `products` SET name=?, quantity=?, price=?, image=? WHERE id=?");
+        $update_product->execute([$name, $quantity, $price, $image, $update_id]);
+    } else {
+        $update_product = $conn->prepare("UPDATE `products` SET name=?, quantity=?, price=? WHERE id=?");
+        $update_product->execute([$name, $quantity, $price, $update_id]);
+    }
+
+    header('location:products.php');
+}
 
 
 ?>
@@ -121,13 +149,13 @@ if(isset($_GET['delete'])){
                             <input type="text" required placeholder="Unit (e.g., 100mg, 100g)" name="unit" class="form-control" id="unitInput" value="">
                         </div>
                         <div class="mb-3">
-                            <label for="imageInput" class="form-label">Image:</label>
-                            <input type="file" name="image" class="form-control" accept="image/jpg, image/jpeg, image/png" id="imageInput">
-                        </div>
-                        <div class="mb-3">
-                            <label for="imagePreview" class="form-label">Image Preview:</label>
-                            <img id="imagePreview" src="#" alt="Image Preview" style="max-width: 200px; max-height: 200px;">
-                        </div>
+                        <label for="imageInput" class="form-label">Image:</label>
+                        <input type="file" name="image" class="form-control" accept="image/jpg, image/jpeg, image/png" id="imageInput" onchange="previewAddImage(event)">
+                    </div>
+                    <div class="mb-3">
+                        <label for="imagePreview" class="form-label">Image Preview:</label>
+                        <img id="imagePreview" src="#" alt="Image Preview" style="max-width: 200px; max-height: 200px; display: none;">
+                    </div>
                         <input type="submit" value="Add Product" class="btn btn-dark" id="submitBtn" name="add_product">
                     </form>
                 </div>
@@ -145,32 +173,34 @@ if(isset($_GET['delete'])){
             </div>
             <div class="modal-body">
                 <form action="" method="POST" enctype="multipart/form-data" id="updateProductForm">
-                    <input type="hidden" name="update_id" id="updateId" value="">
+                    <?php if (isset($_GET['update'])): ?>
+                        <input type="hidden" name="update_id" value="<?= $product['id']; ?>">
+                    <?php endif; ?>
                     <div class="mb-3">
-                        <label for="nameInput" class="form-label">Product Name:</label>
-                        <input type="text" required placeholder="Product name" name="name" maxlength="100" class="form-control" id="nameInput" value="">
+                        <label for="updateNameInput" class="form-label">Product Name:</label>
+                        <input type="text" required placeholder="Product name" name="name" maxlength="100" class="form-control" id="updateNameInput" value="<?= isset($_GET['update']) ? $product['name'] : ''; ?>">
                     </div>
                     <div class="mb-3">
-                        <label for="priceInput" class="form-label">Product Price:</label>
-                        <input type="number" min="0" max="9999999999" required placeholder="Product Price ₱" name="price" class="form-control" id="priceInput" value="">
+                        <label for="updatePriceInput" class="form-label">Product Price:</label>
+                        <input type="number" min="0" max="9999999999" required placeholder="Product Price ₱" name="price" class="form-control" id="updatePriceInput" value="<?= isset($_GET['update']) ? $product['price'] : ''; ?>">
                     </div>
                     <div class="mb-3">
-                        <label for="quantityInput" class="form-label">Quantity:</label>
-                        <input type="number" min="1" required placeholder="Quantity" name="quantity" class="form-control" id="quantityInput" value="">
+                        <label for="updateQuantityInput" class="form-label">Quantity:</label>
+                        <input type="number" min="1" required placeholder="Quantity" name="quantity" class="form-control" id="updateQuantityInput" value="<?= isset($_GET['update']) ? $product['quantity'] : ''; ?>">
                     </div>
                     <div class="mb-3">
-                        <label for="unitInput" class="form-label">Unit:</label>
-                        <input type="text" required placeholder="Unit (e.g., 100mg, 100g)" name="unit" class="form-control" id="unitInput" value="">
+                        <label for="updateUnitInput" class="form-label">Unit:</label>
+                        <input type="text" required placeholder="Unit (e.g., 100mg, 100g)" name="unit" class="form-control" id="updateUnitInput" value="<?= isset($_GET['update']) ? $product['unit'] : ''; ?>">
                     </div>
                     <div class="mb-3">
-                        <label for="imageInput" class="form-label">Image:</label>
-                        <input type="file" name="image" class="form-control" accept="image/jpg, image/jpeg, image/png" id="imageInput">
+                        <label for="updateImageInput" class="form-label">Image:</label>
+                        <input type="file" name="image" class="form-control" accept="image/jpg, image/jpeg, image/png" id="updateImageInput" onchange="previewImage(event)">
                     </div>
                     <div class="mb-3">
-                        <label for="imagePreview" class="form-label">Image Preview:</label>
-                        <img id="imagePreview" src="#" alt="Image Preview" style="max-width: 200px; max-height: 200px;">
+                        <label for="updateImagePreview" class="form-label"></label>
+                        <img id="updateImagePreview" src="<?= isset($_GET['update']) ? '../images/' . $product['image'] : ''; ?>" alt="Image Preview" style="max-width: 200px; max-height: 200px;">
                     </div>
-                    <input type="submit" value="Update Product" class="btn btn-dark" id="submitBtn" name="update_product">
+                    <input type="submit" value="<?= isset($_GET['update']) ? 'Update Product' : '' ?>" name="<?= isset($_GET['update']) ? 'update_product' : '' ?>" class="btn btn-dark">
                 </form>
             </div>
         </div>
@@ -189,7 +219,7 @@ if(isset($_GET['delete'])){
                      <thead class="bg-dark text-white">
                         <tr>
                            <th scope="col">#</th>
-                           <th scope="col">Name</th>
+                           <th scope="col"> Product Name</th>
                            <th scope="col">Quantity</th>
                            <th scope="col">Price</th>
                            <th scope="col">Unit</th>
@@ -219,14 +249,10 @@ if(isset($_GET['delete'])){
                            <td>₱<?= $fetch_products['price']; ?></td>
                            <td><?= $fetch_products['unit']; ?></td> 
                            <td>
-                              <a href="#" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#updateProductModal" 
-                                 data-product-id="<?= $fetch_products['id']; ?>"
-                                 data-product-name="<?= $fetch_products['name']; ?>"
-                                 data-product-price="<?= $fetch_products['price']; ?>"
-                                 data-product-quantity="<?= $fetch_products['quantity']; ?>"
-                                 data-product-unit="<?= $fetch_products['unit']; ?>"
-                                 data-product-image="<?= $fetch_products['image']; ?>">Edit</a>
-                              <a href="products.php?delete=<?= $fetch_products['id']; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this product?');">Delete</a>
+                           <a href="products.php?update=<?= $fetch_products['id']; ?>" class="btn btn-warning">Update</a>
+                           <a href="products.php?delete=<?= $fetch_products['id']; ?>" class="btn btn-danger" 
+                           onclick="return confirm('Are you sure you want to delete this product?');">Delete</a>
+
                            </td>
                         </tr>
                         <?php
@@ -234,6 +260,8 @@ if(isset($_GET['delete'])){
                            } else {
                               echo '<tr><td colspan="6" class="text-center">No Products Found!</td></tr>';
                            }
+
+                          
                         ?>
                      </tbody>
                   </table>
@@ -274,7 +302,34 @@ function searchProducts() {
     emptyMessage.style.display = 'block';
   }
 }
+document.addEventListener("DOMContentLoaded", function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has("update")) {
+            const updateProductModal = new bootstrap.Modal(document.getElementById("updateProductModal"));
+            console.log("Opening modal:", updateProductModal);
+            updateProductModal.show();
+        }
+    });
+function previewImage(event) {
+  const imagePreview = document.getElementById('updateImagePreview');
+  const file = event.target.files[0];
 
+  if (file) {
+    // Check if the file is an image
+    if (file.type.startsWith('image/')) {
+      imagePreview.src = URL.createObjectURL(file);
+      imagePreview.style.display = 'block';
+    } else {
+      imagePreview.src = '#';
+      imagePreview.style.display = 'none';
+      alert('Please select a valid image file.');
+    }
+  } else {
+    // Reset preview to default image or empty string
+    imagePreview.src = 'path/to/default/image.jpg'; // Or imagePreview.src = '';
+    imagePreview.style.display = 'none';
+  }
+}
 // Modal Initialization
 const addProductModal = document.getElementById('addProductModal');
 const modalTitle = document.getElementById('modalTitle');
@@ -299,17 +354,20 @@ document.getElementById('addFoodBtn').addEventListener('click', () => {
 
   addProductModal.show();
 });
-
-const imagePreview = document.getElementById('imagePreview');
-document.getElementById('imageInput').addEventListener('change', function(event) {
+function previewAddImage(event) {
     const imagePreview = document.getElementById('imagePreview');
     const file = event.target.files[0];
-    
+
     if (file) {
+        // Create a URL for the selected file and set it as the src of the image preview
         imagePreview.src = URL.createObjectURL(file);
-        imagePreview.style.display = 'block';
+        imagePreview.style.display = 'block'; // Show the image preview
+    } else {
+        // Reset to default if no file is selected (optional)
+        imagePreview.src = '#'; 
+        imagePreview.style.display = 'none'; // Hide the image preview if no file is selected
     }
-});
+}
 const addProductForm = document.getElementById('addProductForm');
 
 addProductForm.addEventListener('submit', (event) => {
@@ -346,31 +404,6 @@ addProductForm.addEventListener('submit', (event) => {
       // Display an error message to the user
     }
   });
-});
-document.querySelectorAll('a[data-bs-target="#updateProductModal"]').forEach(button => {
-    button.addEventListener('click', function() {
-        // Get product data from data-* attributes
-        const productId = this.getAttribute('data-product-id');
-        const productName = this.getAttribute('data-product-name');
-        const productPrice = this.getAttribute('data-product-price');
-        const productQuantity = this.getAttribute('data-product-quantity');
-        const productUnit = this.getAttribute('data-product-unit');
-        const productImage = this.getAttribute('data-product-image');
-
-        // Set values in modal input fields
-        document.getElementById('updateId').value = productId;
-        document.getElementById('nameInput').value = productName;
-        document.getElementById('priceInput').value = productPrice;
-        document.getElementById('quantityInput').value = productQuantity;
-        document.getElementById('unitInput').value = productUnit;
-
-        // Set the image preview (if required)
-        if (productImage) {
-            document.getElementById('imagePreview').src = `../images/${productImage}`;
-        } else {
-            document.getElementById('imagePreview').src = '';
-        }
-    });
 });
 </script>
 <?php require('inc/scripts.php'); ?>

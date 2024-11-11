@@ -128,14 +128,15 @@
             if(this.responseText == 'pass_mismatch'){
                 alert('error',"Password Mismatch!");
             }
-            else if(this.responseText == 'email_already'){
-                alert('error',"Email is already used!");
-            }
             else if(this.responseText == 'pass_invalid'){
         alert('error', "Password must include an uppercase letter, a lowercase letter, a number, a special character, and be between 8-16 characters.");
     }
+            else if(this.responseText == 'email_already'){
+                alert('error',"Email is already used!");
+            }
+       
             else if(this.responseText == 'num_req'){
-                alert('error',"Phone number should be 10 digits!");
+                alert('error',"Phone number should be 12 digits and Start with 63!");
             }
             else if(this.responseText == 'age_below_16'){
                 alert('error',"Should be 16 above to register!");
@@ -214,5 +215,16 @@
     }
 
     setActive();
+    function validateCheckout() {
+        // Assuming a session variable or similar is used to determine if the user is logged in
+        let isLoggedIn = <?php echo isset($_SESSION['user_id']) ? 'true' : 'false'; ?>;
 
+        if (isLoggedIn) {
+            window.location.href = 'product.php';
+        } else {
+            // Show an alert if not logged in
+            alert('error', 'Please log in to proceed to checkout!');
+        }
+    }
+    
 </script>

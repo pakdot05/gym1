@@ -1,6 +1,6 @@
 function get_users() {
     let xhr = new XMLHttpRequest();
-    xhr.open("POST", "ajax/pending.php", true);
+    xhr.open("POST", "ajax/booking.php", true); // Corrected URL
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
     xhr.onload = function() {
@@ -10,30 +10,31 @@ function get_users() {
     xhr.send('get_users');
 }
 
-function remove_user(id) {
-    if (confirm("Are you sure you want to remove this user?")) {
+function remove_user(btn) {
+    let bookingId = btn.getAttribute('data-id'); 
+
+    if (confirm('Are you sure you want to delete this booking?')) {
         let data = new FormData();
-        data.append('id', id);
+        data.append('id', bookingId);
         data.append('remove_user', '');
 
         let xhr = new XMLHttpRequest();
-        xhr.open("POST", "ajax/pending.php", true);
+        xhr.open("POST", "ajax/booking.php", true); // Corrected URL
 
         xhr.onload = function() {
             if (this.responseText == 1) {
-                alert('success', 'User removed!');
+                alert('success', 'Booking deleted!');
                 get_users();
             } else {
-                alert('error', 'User removal failed!');
+                alert('error', 'Booking deletion failed!');
             }
         }
         xhr.send(data);
     }
 }
-
-function toggle_status(id, val) {
+function toggle_status(id, value) {
     let xhr = new XMLHttpRequest();
-    xhr.open("POST", "ajax/pending.php", true);
+    xhr.open("POST", "ajax/booking.php", true); // Corrected URL
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
     xhr.onload = function() {
@@ -41,23 +42,23 @@ function toggle_status(id, val) {
             alert('success', 'Status toggled!');
             get_users();
         } else {
-            alert('success', 'Server down!');
+            alert('error', 'Server down!');
         }
     }
 
-    xhr.send('toggle_status=' + id + '&value=' + val);
+    xhr.send('toggle_status=' + id + '&value=' + value);
 }
 
-function search_user(username) {
+function search_user(value) {
     let xhr = new XMLHttpRequest();
-    xhr.open("POST", "ajax/pending.php", true);
+    xhr.open("POST", "ajax/booking.php", true); // Corrected URL
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
     xhr.onload = function() {
         document.getElementById('users-data').innerHTML = this.responseText;
     }
 
-    xhr.send('search_user&name=' + username);
+    xhr.send('search_user&name=' + value);
 }
 
 window.onload = function() {

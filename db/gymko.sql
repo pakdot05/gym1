@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 31, 2024 at 01:53 AM
+-- Generation Time: Nov 11, 2024 at 07:23 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -70,7 +70,9 @@ INSERT INTO `bookings` (`id`, `user_id`, `name`, `email`, `date`, `phonenum`, `n
 (255, 55, 'Jefferson tana', 'jeffersontana071@gmail.com', '0000-00-00', '639654321111', '', 'Jefferson Tana', '14:00PM-14:30PM', 0, NULL),
 (256, 56, 'Juan', 'jeffersontana71@gmail.com', '2024-10-30', '639543212112', '', 'Jefferson Tana', '14:00PM-14:30PM', 0, NULL),
 (257, 54, 'Jefferson tana', 'jeffersonjpoy09551351741@gmail.com', '2024-10-30', '639551351701', '', 'Jefferson Tana', '14:30PM-15:00PM', 0, NULL),
-(259, 58, 'Jefferson', 'geafitnessg@gmail.com', '2024-10-31', '639987654333', '', 'MassFuel', '09:00AM-09:30AM', 0, NULL);
+(260, 58, 'Jefferson', 'geafitnessg@gmail.com', '2024-10-31', '639987654333', '', 'MassFuel', '10:00AM-10:30AM', 0, NULL),
+(267, 60, 'Jefferson Taña', 'jeffersontana0171@gmail.com', '2024-11-06', '639876543211', '', 'MassFuel', '20:00PM-20:30PM', 0, 61),
+(283, 59, 'Jefferson Taña', 'jeffersontana071@gmail.com', '2024-11-06', '639551351741', '', 'MassFuel', '14:00PM-14:30PM', 0, 61);
 
 -- --------------------------------------------------------
 
@@ -138,34 +140,24 @@ CREATE TABLE `orders` (
   `contact_number` varchar(20) NOT NULL,
   `address` varchar(255) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `pid` int(11) NOT NULL
+  `pid` int(11) NOT NULL,
+  `claimed` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `orders`
 --
 
-INSERT INTO `orders` (`order_id`, `user_id`, `product_name`, `quantity`, `price`, `total_price`, `payment_method`, `payment_status`, `user_name`, `user_email`, `contact_number`, `address`, `created_at`, `pid`) VALUES
-(37, 34, 'HerbalLife', 1, 50.00, 50.00, 'cash', 'Paid', 'JEFF', 'marckasayan0008@gmail.com', '639507628230', 'Unit C, Realfa Bldg, San Isidro Road, Talisay, 6045 Cebu', '2024-10-17 05:55:22', 0),
-(38, 34, 'HerbalLife', 1, 50.00, 50.00, 'E-Wallet', 'Paid', 'JEFF', 'marckasayan0008@gmail.com', '639507628230', 'Unit C, Realfa Bldg, San Isidro Road, Talisay, 6045 Cebu', '2024-10-17 05:56:10', 6),
-(39, 34, 'HerbalLife', 1, 50.00, 50.00, 'E-Wallet', 'Paid', 'JEFF', 'marckasayan0008@gmail.com', '639507628230', 'Unit C, Realfa Bldg, San Isidro Road, Talisay, 6045 Cebu', '2024-10-17 05:56:12', 6),
-(40, 34, 'HerbalLife', 1, 50.00, 50.00, 'E-Wallet', 'Paid', 'JEFF', 'marckasayan0008@gmail.com', '639507628230', 'Unit C, Realfa Bldg, San Isidro Road, Talisay, 6045 Cebu', '2024-10-17 06:52:57', 6),
-(41, 34, 'MassFuel', 1, 100.00, 100.00, 'cash', 'Paid', 'JEFF', 'marckasayan0008@gmail.com', '639507628230', 'Unit C, Realfa Bldg, San Isidro Road, Talisay, 6045 Cebu', '2024-10-17 06:55:08', 0),
-(42, 34, 'MassFuel', 1, 100.00, 100.00, 'cash', 'Paid', 'JEFF', 'marckasayan0008@gmail.com', '639507628230', 'Unit C, Realfa Bldg, San Isidro Road, Talisay, 6045 Cebu', '2024-10-17 06:55:45', 0),
-(43, 34, 'HerbalLife', 1, 50.00, 50.00, 'cash', 'pending', 'JEFF', 'marckasayan0008@gmail.com', '639507628230', 'Unit C, Realfa Bldg, San Isidro Road, Talisay, 6045 Cebu', '2024-10-17 07:15:21', 0),
-(44, 34, 'HerbalLife', 1, 50.00, 50.00, 'cash', 'pending', 'JEFF', 'marckasayan0008@gmail.com', '639507628230', 'Unit C, Realfa Bldg, San Isidro Road, Talisay, 6045 Cebu', '2024-10-17 07:16:25', 0),
-(45, 36, 'MassFuel', 1, 100.00, 100.00, 'E-Wallet', 'Paid', 'juan delacruz', 'marckasayan00011@gmail.com', '639507628230', 'Unit C, Realfa Bldg, San Isidro Road, Talisay, 6045 Cebu\r\n0258,0076,0607', '2024-10-17 09:33:45', 7),
-(46, 36, 'HerbalLife', 10, 50.00, 500.00, 'cash', 'Paid', 'juan delacruz', 'marckasayan00011@gmail.com', '639507628230', 'Unit C, Realfa Bldg, San Isidro Road, Talisay, 6045 Cebu\r\n0258,0076,0607', '2024-10-17 09:35:11', 0),
-(47, 36, 'MassFuel', 1, 100.00, 100.00, 'E-Wallet', 'Paid', 'juan delacruz', 'marckasayan00011@gmail.com', '639507628230', 'Unit C, Realfa Bldg, San Isidro Road, Talisay, 6045 Cebu\r\n0258,0076,0607', '2024-10-17 09:39:52', 7),
-(48, 36, 'MassFuel', 1, 100.00, 100.00, 'E-Wallet', 'Paid', 'juan delacruz', 'marckasayan00011@gmail.com', '639507628230', 'Unit C, Realfa Bldg, San Isidro Road, Talisay, 6045 Cebu\r\n0258,0076,0607', '2024-10-17 11:16:25', 7),
-(49, 36, 'HerbalLifeNutrition', 1, 200.00, 200.00, 'E-Wallet', 'Paid', 'juan delacruz', 'marckasayan00011@gmail.com', '639507628230', 'Unit C, Realfa Bldg, San Isidro Road, Talisay, 6045 Cebu\r\n0258,0076,0607', '2024-10-17 11:32:48', 8),
-(50, 44, 'chk', 1, 23.00, 23.00, 'E-Wallet', 'Paid', 'vdfg', 'geafitness06@gmail.com', '639614765538', '0085,Tagjaguimit,City of Naga, Cebu', '2024-10-23 05:30:03', 23),
-(51, 44, 'chk', 1, 23.00, 23.00, 'cash', 'Paid', 'vdfg', 'geafitness06@gmail.com', '639614765538', '0085,Tagjaguimit,City of Naga, Cebu', '2024-10-23 05:33:20', 0),
-(52, 44, 'chk', 1, 23.00, 23.00, 'E-Wallet', 'Paid', 'vdfg', 'geafitness06@gmail.com', '639614765538', '0085,Tagjaguimit,City of Naga, Cebu', '2024-10-23 05:33:49', 23),
-(53, 44, 'HerbalLifeNutrition', 1, 200.00, 200.00, 'cash', 'Paid', 'vdfg', 'geafitness06@gmail.com', '639614765538', '0085,Tagjaguimit,City of Naga, Cebu', '2024-10-23 06:53:31', 0),
-(54, 44, 'MassFuel', 1, 100.00, 100.00, 'E-Wallet', 'Paid', 'vdfg', 'geafitness06@gmail.com', '639614765538', '0085,Tagjaguimit,City of Naga, Cebu', '2024-10-23 06:54:14', 7),
-(55, 44, 'chk', 1, 23.00, 23.00, 'cash', 'pending', 'vdfg', 'geafitness06@gmail.com', '639614765538', '0085,Tagjaguimit,City of Naga, Cebu', '2024-10-23 07:18:03', 0),
-(56, 47, 'MassFuel', 1, 100.00, 100.00, 'E-Wallet', 'Paid', 'Jefferson Tana', 'jenellejoycetana@gmail.com', '639876543111', 'Unit C, Realfa Bldg, San Isidro Road, Talisay, 6045 Cebu', '2024-10-26 01:25:10', 7);
+INSERT INTO `orders` (`order_id`, `user_id`, `product_name`, `quantity`, `price`, `total_price`, `payment_method`, `payment_status`, `user_name`, `user_email`, `contact_number`, `address`, `created_at`, `pid`, `claimed`) VALUES
+(72, 59, 'maxman', 1, 12.00, 12.00, 'cash', 'Paid', 'jefferson', 'jeffersontana071@gmail.com', '639551351741', '0085,Tagjaguimit,City of Naga, Cebu', '2024-11-07 04:17:10', 0, 1),
+(75, 59, 'maxman', 1, 12.00, 12.00, 'cash', 'pending', 'Jefferson Taña', 'jeffersontana071@gmail.com', '639551351741', '0085,Tagjaguimit,City of Naga, Cebu', '2024-11-07 04:56:40', 0, 0),
+(76, 59, 'maxman', 1, 12.00, 12.00, 'E-Wallet', 'Paid', 'Jefferson Taña', 'jeffersontana071@gmail.com', '639551351741', '0085,Tagjaguimit,City of Naga, Cebu', '2024-11-07 04:56:55', 24, 0),
+(77, 59, 'maxman', 2, 12.00, 24.00, 'E-Wallet', 'Paid', 'jefferson', 'jeffersontana071@gmail.com', '639551351741', '0085,Tagjaguimit,City of Naga, Cebu', '2024-11-07 05:13:35', 24, 1),
+(78, 61, 'herballife', 1, 30.00, 30.00, 'cash', 'Cancelled', 'Jefferson Taña', 'jefferson71@gmail.com', '635551351741', '0085,Tagjaguimit,City of Naga, Cebu', '2024-11-08 02:25:23', 0, 0),
+(79, 61, 'herballife', 1, 30.00, 30.00, 'cash', 'Cancelled', 'Jefferson Taña', 'jefferson71@gmail.com', '635551351741', '0085,Tagjaguimit,City of Naga, Cebu', '2024-11-08 02:33:44', 0, 0),
+(86, 61, 'herbal', 1, 20.00, 20.00, 'E-Wallet', 'Paid', 'jefferson', 'jefferson71@gmail.com', '635551351741', '0085,Tagjaguimit,City of Naga, Cebu', '2024-11-08 03:12:41', 25, 1),
+(87, 61, 'herballife', 1, 30.00, 30.00, 'cash', 'Cancelled', 'Jefferson Taña', 'jefferson71@gmail.com', '635551351741', '0085,Tagjaguimit,City of Naga, Cebu', '2024-11-08 03:27:58', 0, 0),
+(88, 61, 'maxman', 2, 12.00, 24.00, 'cash', 'Cancelled', 'Jefferson Taña', 'jefferson71@gmail.com', '635551351741', '0085,Tagjaguimit,City of Naga, Cebu', '2024-11-08 03:35:20', 0, 0);
 
 -- --------------------------------------------------------
 
@@ -187,8 +179,10 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`id`, `name`, `quantity`, `price`, `image`, `unit`) VALUES
-(7, 'MassFuel', 95, 100.00, 'dfd3f6db0ead07ec259b573261e673b7.jpg', ''),
-(24, 'maxman', 12, 12.00, 'dfd3f6db0ead07ec259b573261e673b7.jpg', '12gram');
+(24, 'maxman', 2, 12.00, 'it9.jpg', '12gram'),
+(25, 'herbal', 19, 20.00, '382478263_354166050290408_4507629861043112992_n.jpg', '1'),
+(26, 'herballife', 23, 30.00, '382478263_354166050290408_4507629861043112992_n.jpg', '12gn'),
+(27, 'atsara', 100, 30.00, '243756284_232853178807914_387874907702534953_n.jpg', '1gm');
 
 -- --------------------------------------------------------
 
@@ -266,7 +260,10 @@ INSERT INTO `subscriptions` (`id`, `user_id`, `name`, `email`, `plan`, `price`, 
 (50, 34, 'JEFF', 'marckasayan0008@gmail.com', 'Weekly', 245.00, 'week', 'Unlock a week of unlimited access to our gym, with additional perks like diet plans and group sessions.', '670f0e3f4178d', 'pending', '2024-10-16 00:52:15', '2024-10-23'),
 (52, 32, 'jefferson', 'Kenshin2@gmail.com', 'Weekly', 245.00, 'week', 'Unlock a week of unlimited access to our gym, with additional perks like diet plans and group sessions.', '6710b3b5ec700', 'pending', '2024-10-17 06:50:31', '2024-10-24'),
 (112, 49, 'Jefferson', 'jeffersontana071@gmail.com', 'Weekly', 245.00, 'week', 'Unlock a week of unlimited access to our gym, with additional perks like diet plans and group sessions.', '671f9a960c310', 'pending', '2024-10-28 14:07:19', '2024-11-04'),
-(113, 51, 'Jefferson', 'minglanillageafitnessgym@gmail.com', 'Weekly', 245.00, 'week', 'Unlock a week of unlimited access to our gym, with additional perks like diet plans and group sessions.', '67204c5c57ba8', 'success', '2024-10-29 02:45:49', '2024-11-05');
+(113, 51, 'Jefferson', 'minglanillageafitnessgym@gmail.com', 'Weekly', 245.00, 'week', 'Unlock a week of unlimited access to our gym, with additional perks like diet plans and group sessions.', '67204c5c57ba8', 'success', '2024-10-29 02:45:49', '2024-11-05'),
+(114, 58, 'Jefferson', 'geafitnessg@gmail.com', 'Weekly', 245.00, 'week', 'Unlock a week of unlimited access to our gym, with additional perks like diet plans and group sessions.', '6722dbf514724', 'success', '2024-10-31 01:23:02', '2024-11-07'),
+(115, 59, 'Jefferson Taña', 'jeffersontana071@gmail.com', 'Yearly', 10000.00, 'yr', 'Enjoy a full year of unlimited access with additional benefits, including exclusive workshops and premium support.', '672afcdbdd0ee', 'success', '2024-11-06 05:21:33', '2025-11-06'),
+(116, 61, 'Jefferson Taña', 'jefferson71@gmail.com', 'Monthly', 999.00, 'mo', 'Commit to a month of full access, including personalized training, diet planning, and progress tracking.', '672d8af4ab9b8', 'success', '2024-11-08 03:52:22', '2024-12-08');
 
 -- --------------------------------------------------------
 
@@ -279,15 +276,6 @@ CREATE TABLE `team_details` (
   `name` varchar(100) NOT NULL,
   `picture` varchar(200) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `team_details`
---
-
-INSERT INTO `team_details` (`team_id`, `name`, `picture`) VALUES
-(25, 'juan', 'IMG_11354.webp'),
-(26, 'jean', 'IMG_27053.webp'),
-(27, 'jefferson', 'IMG_63389.webp');
 
 -- --------------------------------------------------------
 
@@ -390,12 +378,11 @@ CREATE TABLE `user_cred` (
 --
 
 INSERT INTO `user_cred` (`user_id`, `name`, `email`, `dob`, `phonenum`, `address`, `password`, `profile`, `status`, `datentime`, `appointment_status`, `qr_code`) VALUES
-(53, 'Jefferson tana', 'kenshin2@gmail.com', '0002-02-02', '639551351741', 'Naga,Cebu', '$2y$10$5R9hrmOSwWPLyblaDDCz4e945qVJlwKxuu6PcMmPJnP3LmL2CZUIS', 'IMG_73556.jpeg', 1, '2024-10-30 12:32:00', 'pending', ''),
-(54, 'Jefferson tana', 'jeffersonjpoy09551351741@gmail.com', '2002-02-01', '639551351701', 'Naga,Cebu', '$2y$10$uS8OMfIeog.bq22ZQ.UtcOstlcdkRAH/1GpNuB90m9FpRVooS4ORG', 'IMG_42951.jpeg', 1, '2024-10-30 12:35:03', 'pending', ''),
-(55, 'Jefferson tana', 'jeffersontana071@gmail.com', '2002-02-02', '639654321111', 'Naga,Cebu', '$2y$10$ItnUd7s1wTsu.meBLy6KjuET/Aq5vkDKCm6is9ui1AvJgpMVkNldy', 'IMG_88975.jpeg', 1, '2024-10-30 12:49:57', 'pending', ''),
-(56, 'Juan', 'jeffersontana71@gmail.com', '2002-02-02', '639543212112', 'Naga,Cebu', '$2y$10$JLjR7nT0ebzunuI6F2Bp5.JGNHAt6zSoVpakkP8aflBpSLTQdWvzK', 'IMG_43399.jpeg', 1, '2024-10-30 13:26:18', 'pending', ''),
-(57, 'Jefferson tana', 'juandelacruz05@gmail.com', '2002-02-02', '639876543215', 'Naga,Cebu', '$2y$10$zZh5CRG.syUefgcITGfWKe/AK98VlWRAzVEhOqnPdIiaN0WPTewf2', 'IMG_91218.jpeg', 1, '2024-10-30 13:40:21', 'available', ''),
-(58, 'Jefferson', 'geafitnessg@gmail.com', '2002-02-22', '639987654333', 'Unit C, Realfa Bldg, San Isidro Road, Talisay, 6045 Cebu', '$2y$10$ZruyvCZ5Z1qllRhcrJvOpes6IzutquD8CklCOWoK3QeKzsk/C6CiK', '434023109_742951687604492_885505134420779832_n.jpg', 1, '2024-10-31 07:39:02', 'pending', '');
+(58, 'Jefferson', 'geafitnessg@gmail.com', '2002-02-22', '639987654333', 'Unit C, Realfa Bldg, San Isidro Road, Talisay, 6045 Cebu', '$2y$10$ZruyvCZ5Z1qllRhcrJvOpes6IzutquD8CklCOWoK3QeKzsk/C6CiK', '434023109_742951687604492_885505134420779832_n.jpg', 1, '2024-10-31 07:39:02', 'pending', ''),
+(59, 'Jefferson Taña', 'jeffersontana071@gmail.com', '2002-02-02', '639551351741', '0085,Tagjaguimit,City of Naga, Cebu', '$2y$10$kKnMYSuOS.elUstStSERd.yTagFW/d0DzHPPafHEpbbD0rqoE3PSO', 'IMG_81539.jpeg', 1, '2024-11-06 08:33:40', 'pending', ''),
+(60, 'Jefferson Taña', 'jeffersontana0171@gmail.com', '2002-02-02', '639876543211', '0085,Tagjaguimit,City of Naga, Cebu', '$2y$10$vEg0fpPYGg1uM5gt4QgXKuEVOvHPwyESBbklvACJFxFWoMj6wqoAy', 'IMG_11215.jpeg', 1, '2024-11-06 10:14:12', 'pending', ''),
+(61, 'Jefferson Taña', 'jefferson71@gmail.com', '2002-02-02', '635551351741', '0085,Tagjaguimit,City of Naga, Cebu', '$2y$10$hq4vuj3QZbgqWvIUH.LQo.chahUkz0SW9B.lLVwRDw2a4vjhgicuu', 'hyun.jpg', 1, '2024-11-08 10:02:33', 'available', ''),
+(62, 'Jefferson Taña', 'jefferson@gmail.com', '2002-02-02', '639472432211', '0085,Tagjaguimit,City of Naga, Cebu', '$2y$10$lvuMrkxTEHiNgy/WRZQJcu2BiyzNAtdGDs5QdtPUfiLJEkLemvm5m', 'IMG_55850.jpeg', 1, '2024-11-11 14:16:32', 'available', '');
 
 --
 -- Indexes for dumped tables
@@ -502,7 +489,7 @@ ALTER TABLE `admin_cred`
 -- AUTO_INCREMENT for table `bookings`
 --
 ALTER TABLE `bookings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=260;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=284;
 
 --
 -- AUTO_INCREMENT for table `carousel`
@@ -520,13 +507,13 @@ ALTER TABLE `contact_details`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=89;
 
 --
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `settings`
@@ -544,7 +531,7 @@ ALTER TABLE `specialty`
 -- AUTO_INCREMENT for table `subscriptions`
 --
 ALTER TABLE `subscriptions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=114;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=117;
 
 --
 -- AUTO_INCREMENT for table `team_details`
@@ -574,7 +561,7 @@ ALTER TABLE `trainor_specialty`
 -- AUTO_INCREMENT for table `user_cred`
 --
 ALTER TABLE `user_cred`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=59;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63;
 
 --
 -- Constraints for dumped tables

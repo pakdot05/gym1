@@ -1,9 +1,3 @@
-<?php
-    require('inc/essentials.php');
-    require('inc/db_config.php');
-    adminLogin();
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,17 +19,31 @@
             width: 100%;
         }
 
+        .modal-dialog {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .modal-content {
+            width: 100%;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+        }
+
     </style>
 
 </head>
 <body class="bg-light">
-    
+
     <?php require('inc/header.php');?>
 
     <div class="container-fluid" id="main-content">
         <div class="row">
             <div class="col-lg-10 ms-auto p-4 overflow-hidden">
-              <h3 class="mb-4">USERS</h3>
+              <h3 class="mb-4">Gym-goer</h3>
 
                 <!-- USERS -->
 
@@ -55,13 +63,15 @@
                                         <th scope="col" width="10%">Gym-goer</th>
                                         <th scope="col" width="15%">Email</th>
                                         <th scope="col">Phone#</th>
-                                        <th scope="col">Address</th>                          
+                                        <th scope="col">Address</th>
                                         <th scope="col">Bdate</th>
                                         <th scope="col" width="10%">Status</th>
                                         <th scope="col" width="10%">Date</th>
+                                        <th scope="col" width="10%">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody id="users-data">
+                                    <!-- User data will be loaded here -->
                                 </tbody>
                             </table>
                         </div>
@@ -73,18 +83,21 @@
 
     <!-- Modal -->
     <div class="modal fade" id="userDetailsModal" tabindex="-1" aria-labelledby="userDetailsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="userDetailsModalLabel">User Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="modal-user-details">
-                <!-- User details will be populated here by JavaScript -->
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userDetailsModalLabel">User Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modal-user-details">
+                    <!-- User details will be populated here by JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 
     <?php require('inc/scripts.php');?>

@@ -24,25 +24,16 @@
     $patient_row = mysqli_fetch_assoc($patient_result);
     $patient_count = $patient_row['patient_count'];
 
-    // Execute SQL query to count visitors' queries
-    // $query_result = mysqli_query($con, "SELECT COUNT(*) AS query_count FROM user_queries");
-    // $query_row = mysqli_fetch_assoc($query_result);
-    // $query_count = $query_row['query_count'];
 
-    // Execute SQL query to count approved bookings
-    $approved_booking_result = mysqli_query($con, "SELECT COUNT(*) AS booking_count FROM bookings WHERE `status` = 1");
-    $approved_booking_row = mysqli_fetch_assoc($approved_booking_result);
-    $approved_booking_count = $approved_booking_row['booking_count'];
+
+    $subscribe_result = mysqli_query($con, "SELECT COUNT(*) AS subscription_count FROM subscriptions");
+    $subscribe_row = mysqli_fetch_assoc($subscribe_result);
+    $subscribe_count = $subscribe_row['subscription_count'];
 
     // Execute SQL query to count unapproved bookings
-    $unapproved_booking_result = mysqli_query($con, "SELECT COUNT(*) AS booking_count FROM bookings WHERE `status` = 0");
-    $unapproved_booking_row = mysqli_fetch_assoc($unapproved_booking_result);
-    $unapproved_booking_count = $unapproved_booking_row['booking_count'];
-
-    // Execute SQL query to count unapproved bookings
-    $completed_booking_result = mysqli_query($con, "SELECT COUNT(*) AS booking_count FROM bookings WHERE `status` = 3");
-    $completed_booking_row = mysqli_fetch_assoc($completed_booking_result);
-    $completed_booking_count = $completed_booking_row['booking_count'];
+    $product_result = mysqli_query($con, "SELECT COUNT(*) AS product_count FROM products");
+    $product_row = mysqli_fetch_assoc($product_result);
+    $product_count = $product_row['product_count'];
 
     // Execute SQL query to count bookings dated today with status = 1
     $today_date = date('Y-m-d');
@@ -110,7 +101,6 @@
         <div class="col-lg-10 ms-auto p-4 overflow-hidden">
             <h3 class="mb-4">DASHBOARD</h3>
             <div class="row">
-                <!-- Today's Approved Booking Box -->
                 <div class="col-lg-3 col-md-6 mb-4">
                     <a href="book.php" class="dashboard-link">
                         <div class="dashboard-box">
@@ -121,35 +111,23 @@
                     </a>
                 </div>
 
-                <!-- Approved Booking Box -->
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <a href="approved.php" class="dashboard-link">
+         
+                                <div class="col-lg-3 col-md-6 mb-4">
+                    <a href="invoices.php" class="dashboard-link">
                         <div class="dashboard-box">
-                            <h5>Approved</h5>
+                            <h5>Subscriber</h5>
                             <i class="fa fa-book m-2" style="font-size:30px;"></i>
-                            <p>Total Appointments: <?php echo $approved_booking_count; ?></p>
+                            <p>Total Subscriber: <?php echo $subscribe_count; ?></p>  <!-- Corrected -->
                         </div>
                     </a>
                 </div>
 
-                <!-- Completed Booking Box -->
                 <div class="col-lg-3 col-md-6 mb-4">
                     <a href="completed.php" class="dashboard-link">
                         <div class="dashboard-box">
-                            <h5>Completed</h5>
+                            <h5>Product</h5>
                             <i class="fa fa-book m-2" style="font-size:30px;"></i>
-                            <p>Total Appointments: <?php echo $completed_booking_count; ?></p>
-                        </div>
-                    </a>
-                </div>
-
-                <!-- Unapproved Booking Box -->
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <a href="pending.php" class="dashboard-link">
-                        <div class="dashboard-box">
-                            <h5>Pending</h5>
-                            <i class="fa fa-book m-2" style="font-size:30px;"></i>
-                            <p>Total Appointments: <?php echo $unapproved_booking_count; ?></p>
+                            <p>Total Product: <?php echo $product_count; ?></p>
                         </div>
                     </a>
                 </div>

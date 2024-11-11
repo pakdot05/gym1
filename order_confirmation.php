@@ -12,8 +12,18 @@ if (!isset($_SESSION['message'])) {
 
 // Fetch user information from the session (or from the database if needed)
 $userId = $_SESSION['uId'];
-$userName = $_SESSION['userName'] ?? 'Guest'; // Adjust as necessary to fetch from session or database
 
+// Query the database to get the user's name
+$sql = "SELECT name FROM user_cred WHERE user_id = $userId";
+$result = mysqli_query($con, $sql);
+
+if (mysqli_num_rows($result) > 0) {
+    $user = mysqli_fetch_assoc($result);
+    $userName = $user['name'];
+} else {
+    // Fallback in case no user is found
+    $userName = 'Guest';
+}
 // Clear the message after displaying
 $message = $_SESSION['message'];
 unset($_SESSION['message']);
@@ -86,7 +96,7 @@ unset($_SESSION['message']);
             <p>For any inquiries, please contact us at minganillageafitnessgym@gmail.com.</p>
         </div>
 
-        <a href="product.php" class="btn btn-primary mt-3">Continue Shopping</a>
+        <!-- <a href="product.php" class="btn btn-primary mt-3">Continue Shopping</a> -->
     </div>
 
     <!-- FOOTER -->

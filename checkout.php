@@ -51,9 +51,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     header('Location: ./ajax/ewallet_payment.php?pid=' . urlencode($productId) . '&name=' . urlencode($productName) . '&price=' . $productPrice . '&qty=' . $quantity . '&amount=' . $totalPrice . '&name=' . urlencode($userName) . '&email=' . urlencode($userEmail) . '&id=' . $userId);
                     exit();
                 } else {
-                    $_SESSION['message'] = "Order placed successfully!";
-                    header('Location: order_confirmation.php'); // Redirect to a confirmation page for cash
-                    exit();
+                    // Update product quantity in the database (for cash on pickup)
+                    $updateQuery = "UPDATE products SET quantity = quantity - ? WHERE id = ?";
+                    if ($updateStmt = $con->prepare($updateQuery)) {
+                        $updateStmt->bind_param("ii", $quantity, $productId);
+                        if ($updateStmt->execute()) {
+                            $_SESSION['message'] = "Order placed successfully!";
+                            header('Location: order_confirmation.php'); // Redirect to a confirmation page for cash
+                            exit();
+                        } else {
+                            $_SESSION['error'] = "Error updating product quantity: " . $updateStmt->error;
+                        }
+                        $updateStmt->close();
+                    } else {
+                        die("Error preparing update statement: " . $con->error);
+                    }
                 }
             } else {
                 $_SESSION['error'] = "Error placing order: " . $stmt->error;

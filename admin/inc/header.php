@@ -64,9 +64,9 @@
                     <li class="nav-item">
                         <a id="patient-link" class="link" href="users.php">Members</a>
                     </li>
-                    <li class="nav-item">
-                        <a id="appointment-link" class="link" href="appointment.php">Booking</a>
-                    </li>
+                    <!-- <li class="nav-item">
+                        <a id="appointment-link" class="link" href="book.php">Booking</a>
+                    </li> -->
                     <li class="nav-item">
                         <a id="product-link" class="link" href="products.php">Product</a>
                     </li>
@@ -78,6 +78,9 @@
                     </li>
                     <li class="nav-item">
                         <a id="invoices-link" class="link" href="invoices.php">Invoices</a>
+                    </li>
+                    <li class="nav-item">
+                        <a id="invoices-link" class="link" href="all.php">All Invoices</a>
                     </li>
                     <li class="nav-item">
                         <a id="specialty-link" class="link" href="specialty.php">Services</a>

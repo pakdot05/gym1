@@ -7,6 +7,7 @@ if (!isset($_SESSION['uId'])) {
     die("User not logged in");
 }
 
+
 $user_id = $_SESSION['uId'];
 $statusSql = "SELECT appointment_status FROM user_cred WHERE user_id = ?";
 $statusResult = select($statusSql, [$user_id], 'i');
@@ -31,66 +32,70 @@ if ($trainer_id) {
 date_default_timezone_set('Asia/Manila');
 $currentTime = new DateTime();
 
-// Define the timeslot variables OUTSIDE the function
 $duration = 30;
 $cleanup = 0;
 $start = "07:00";
 $end = "20:00";
-
-// Function declaration
-function timeslots($duration, $cleanup, $start, $end) {
-    if (empty($start) || empty($end)) {
-        return [];
-    }
-
+$date = isset($_GET['date']) ? date('Y-m-d', strtotime($_GET['date'])) : null;
+function timeslots($duration, $cleanup, $start, $end, $selectedDate) {
+    global $currentTime;
+    
     $start = new DateTime($start);
     $end = new DateTime($end);
     $interval = new DateInterval("PT" . $duration . "M");
     $cleanupInterval = new DateInterval("PT" . $cleanup . "M");
-    $slots = array();
+    $slots = [];
 
-    global $currentTime;
-    if ($start < $currentTime) {
-        $start = $currentTime;
+    // Check if selected date is today
+    $today = (new DateTime())->format('Y-m-d');
+    $isToday = ($selectedDate === $today);
+
+    // Adjust start time for today; otherwise, use 7:00 AM
+    if ($isToday && $start < $currentTime) {
+        $start = clone $currentTime;
+    } else {
+        $start->setTime(7, 0); // Start at 7:00 AM for future dates
     }
 
+    // Ensure `start` is aligned to the nearest 30-minute mark
     $start->setTime($start->format('H'), round($start->format('i') / 30) * 30);
-
-    $minAcceptableTime = clone $currentTime;
-    $minAcceptableTime->add(new DateInterval('PT30M'));
-
     $endPeriod = clone $start;
     $endPeriod->add($interval);
 
-    for ($intStart = $start; $endPeriod < $end; $intStart->add($interval)->add($cleanupInterval)) {
-        $endPeriod = clone $intStart;
+    while ($endPeriod <= $end) {
+        $endPeriod = clone $start;
         $endPeriod->add($interval);
 
-        $isPast = ($intStart < $currentTime);
-        $isAcceptable = ($intStart >= $minAcceptableTime);
+        $isPast = ($isToday && $start < $currentTime);
 
-        if ($isAcceptable) {
-            $slots[] = array(
-                'slot' => $intStart->format("H:iA") . "-" . $endPeriod->format("H:iA"),
+        // Only add slots that are in the future for today or all slots for future dates
+        if (!$isPast || !$isToday) {
+            $slots[] = [
+                'slot' => $start->format("H:iA") . "-" . $endPeriod->format("H:iA"),
                 'isPast' => $isPast
-            );
+            ];
         }
+
+        // Move to the next slot time
+        $start->add($interval)->add($cleanupInterval);
     }
 
     return $slots;
 }
 
-// Call the function with arguments and store the result
-$timeslots = timeslots($duration, $cleanup, $start, $end);
 
-// Retrieve bookings
-if (isset($_GET['date'])) {
+// Call the function with arguments and store the result
+$timeslots = timeslots($duration, $cleanup, $start, $end, $date);
+
+if (isset($_GET['date']) && $trainer_id) {
     $date = $_GET['date'];
     $date = date('Y-m-d', strtotime($date));
 
-    $bookingsSql = "SELECT timeslot FROM bookings WHERE date = ?";
-    $bookingsResult = select($bookingsSql, [$date], 's');
+    // Retrieve bookings only for the selected date and trainer
+    $bookingsSql = "SELECT timeslot FROM bookings WHERE date = ? AND trainor_id = ?";
+    $bookingsResult = select($bookingsSql, [$date, $trainer_id], 'si');
     $bookings = array();
+    
     if ($bookingsResult->num_rows > 0) {
         while ($row = $bookingsResult->fetch_assoc()) {
             $bookings[] = $row['timeslot'];
@@ -107,15 +112,15 @@ if (isset($_POST['submit']) && $userStatus['appointment_status'] != 'pending' &&
     $trainor_name = $_POST['trainor_name'];
     $timeslot = $_POST['timeslot'];
 
-    // Check if the timeslot is already booked
-    $checkBookingSql = "SELECT * FROM bookings WHERE date = ? AND timeslot = ?";
-    $checkBookingResult = select($checkBookingSql, [$date, $timeslot], 'ss');
+    // Check if the timeslot is already booked for this trainer
+    $checkBookingSql = "SELECT * FROM bookings WHERE date = ? AND timeslot = ? AND trainor_id = ?";
+    $checkBookingResult = select($checkBookingSql, [$date, $timeslot, $trainer_id], 'ssi');
     if ($checkBookingResult->num_rows > 0) {
         // Slot is already booked
     } else {
         // Insert the new booking
-        $insertBookingSql = "INSERT INTO bookings (user_id, name, timeslot, email, phonenum, note, date, trainor_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        $insertBookingResult = insert($insertBookingSql, [$user_id, $name, $timeslot, $email, $phonenum, $note, $date, $trainor_name], 'isssssss');
+        $insertBookingSql = "INSERT INTO bookings (user_id, name, timeslot, email, phonenum, note, date, trainor_name, trainor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $insertBookingResult = insert($insertBookingSql, [$user_id, $name, $timeslot, $email, $phonenum, $note, $date, $trainor_name, $trainer_id], 'isssssssi');
 
         // Update appointment status in user_cred table to pending
         $updateStatusSql = "UPDATE user_cred SET appointment_status = 'pending' WHERE user_id = ?";
@@ -168,7 +173,6 @@ if (isset($_POST['submit']) && $userStatus['appointment_status'] != 'pending' &&
                 </ul>
 
                 <p>You will receive another email once your appointment is confirmed or declined.</p>
-
                 <p>Thank you,</p>
 
                 <p>Gymko Team</p>
@@ -179,8 +183,6 @@ if (isset($_POST['submit']) && $userStatus['appointment_status'] != 'pending' &&
             // Send email to trainer
             $mail->clearAddresses();
             $mail->addAddress($trainer_email);
-
-            // Content for trainer email
             $mail->Subject = 'New Appointment Request at Geafitnessgym';
             $mail->Body = "
                 <p>Dear {$trainor_name},</p>
@@ -198,7 +200,6 @@ if (isset($_POST['submit']) && $userStatus['appointment_status'] != 'pending' &&
                 </ul>
 
                 <p>Please review the request and confirm or decline the appointment.</p>
-
                 <p>Thank you,</p>
 
                 <p>Gymko Team</p>
@@ -208,7 +209,6 @@ if (isset($_POST['submit']) && $userStatus['appointment_status'] != 'pending' &&
 
             echo "
                 <script>
-                alert('Message was sent successfully. Thank you for reaching us!');
                 document.location.href = 'book.php';
                 </script>
             ";
@@ -267,38 +267,23 @@ if (isset($_POST['submit']) && $userStatus['appointment_status'] != 'pending' &&
             <div class="col-md-12">
                 <?php echo isset($msg) ? $msg : ""; ?>
             </div>
-            <div class="mb-2" style="font-size: 14px; margin-left: 15px;">
-                <a href="#" onclick="goBack()" class="text-secondary text-decoration-none"> < BACK</a>
-            </div>
             <hr style="width: 98%;">
+
             <?php if ($userStatus['appointment_status'] == 'pending') { ?>
-                <div class="alert alert-warning" style="height: 150px;">You already have a pending appointment. Please complete or cancel your current appointment before booking a new one.</div>
-                <br><br><br>
+                <div class="alert alert-warning">You already have a pending appointment. Please complete or cancel your current appointment before booking a new one.</div>
             <?php } elseif ($userStatus['appointment_status'] == 'approved') { ?>
-                <div class="alert alert-warning" style="height: 150px;">You already have an appointment. Please complete or cancel your current appointment before booking a new one.</div>
-                <br><br><br>
+                <div class="alert alert-warning">You already have an appointment. Please complete or cancel your current appointment before booking a new one.</div>
             <?php } else { ?>
                 <div class="col-md-12">
                     <?php
                         if (isset($date) && isset($timeslots)) {
-                            // Generate the timeslots
+                            // Generate timeslot buttons
                             foreach ($timeslots as $ts) {
-                                // Debugging: Check the timeslot and whether it's past
-                                echo "<!-- Debug: Timeslot generated: " . $ts['slot'] . " | Is Past: " . ($ts['isPast'] ? 'Yes' : 'No') . " -->";
+                                $timeslot = explode(' (', $ts['slot'])[0];
 
-                                // Access the 'slot' key from the $ts array
-                                $timeslotString = $ts['slot']; 
-                                $parts = explode(' (', $timeslotString); 
-                                $timeslot = $parts[0]; 
-
-                                // Debugging: Check if the timeslot is booked
-                                echo "<!-- Debug: Checking if booked: " . $timeslot . " | Bookings: " . implode(', ', $bookings) . " -->";
-
-                                if (isset($bookings) && in_array($timeslot, $bookings)) { // Check if $bookings is set
-                                    echo '<button class="btn m-1 p-2 appoint unavailable haber" style="width: 170px; background-color: #dc3545 !important;" disabled>' . $timeslot . '</button>';
-                                } else if ($ts['isPast']) {
-                                    // Skip past timeslots
-                                    echo "<!-- Debug: Skipping past timeslot: " . $timeslot . " -->";
+                                if (in_array($timeslot, $bookings)) {
+                                    echo '<button class="btn m-1 p-2 appoint unavailable" style="width: 170px; background-color: #dc3545 !important;" disabled>' . $timeslot . '</button>';
+                                } elseif ($ts['isPast']) {
                                     continue;
                                 } else {
                                     echo '<button class="btn m-1 p-2 appoint" style="width: 170px;" data-bs-toggle="modal" data-bs-target="#myModal" data-timeslot="' . $timeslot . '">' . $timeslot . '</button>';
@@ -310,10 +295,19 @@ if (isset($_POST['submit']) && $userStatus['appointment_status'] != 'pending' &&
                     ?>
                 </div>
             <?php } ?>
-            <br><br><br><br>
         </div>
     </div>
-
+    <?php
+    // Generate modals dynamically
+    if (isset($date) && isset($timeslots)) {
+        foreach ($timeslots as $ts) {
+            $timeslot = explode(' (', $ts['slot'])[0];
+            if (in_array($timeslot, $bookings)) {
+                continue; // Skip if timeslot is already booked
+            }
+        }
+    }
+            ?>
     <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -323,10 +317,10 @@ if (isset($_POST['submit']) && $userStatus['appointment_status'] != 'pending' &&
                 </div>
                 <div class="modal-body">
                     <form action="" method="post">
-                        <div class="form-group mb-3">
-                            <label for="timeslot">Timeslot</label>
-                            <input required type="text" readonly name="timeslot" id="timeslot" class="form-control">
-                        </div>
+                    <div class="form-group mb-3">
+                                    <label for="timeslot">Timeslot</label>
+                                    <input required type="text" name="timeslot" id="timeslot" class="form-control" value="">
+                                </div>
                         <div class="form-group mb-3">
                             <label for="trainor_name">Trainor</label>
                             <input required type="text" readonly name="trainor_name" id="trainor_name" class="form-control" value="<?php echo isset($_SESSION['trainor']['name']) ? $_SESSION['trainor']['name'] : ''; ?>">
@@ -359,24 +353,29 @@ if (isset($_POST['submit']) && $userStatus['appointment_status'] != 'pending' &&
             </div>
         </div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $(".appoint").click(function() {
+                var timeslot = $(this).data('timeslot');
+                $("#slot").html(timeslot);
+                $("#timeslot").val(timeslot);
+                $("#myModal").modal("show");
+            });
+        });
+    </script>
 
     <script>
-        var modal = document.getElementById('myModal');
-        var timeslotInput = document.getElementById('timeslot');
-        var slotDisplay = document.getElementById('slot');
-
-        modal.addEventListener('show.bs.modal', function(event) {
-            var button = event.relatedTarget; 
-            var timeslot = button.getAttribute('data-timeslot'); 
-            timeslotInput.value = timeslot;
-            slotDisplay.textContent = timeslot;
-        });
-
-        function goBack() {
+   function goBack() {
             window.history.back();
         }
     </script>
-
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
     <?php require('inc/footer.php') ?>
 </body>;
 </html> 

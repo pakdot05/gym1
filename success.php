@@ -2,8 +2,6 @@
 require('inc/links.php'); // Include your database connection and other necessary files
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
-// Get the payment ID from the URL
-
 
 $paymentId = isset($_GET['paymentId']) ? $_GET['paymentId'] : '';
 

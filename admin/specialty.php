@@ -16,7 +16,7 @@
     <style>
 
         th{
-            background-color: #09858d !important;
+            background-color: #40534C !important;
         }
 
     </style>

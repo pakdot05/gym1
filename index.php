@@ -384,66 +384,7 @@
         </div>
     </div>
 
-    <!-- FEEDBACKS -->
-<h2 class="mt-5 pt-4 mb-4 text-center fw-bold">CUSTOMER FEEDBACK</h2>
 
-    <div class="container mt-5">
-        <div class="swiper swiper-feedbacks">
-            <div class="swiper-wrapper mb-5">
-
-              <div class="swiper-slide bg-white p-4">
-                <div class="profile d-flex align-items-center mb-3">
-                    <img src="images/trainors/johnny.jpg" width="30px">
-                    <h6 class="m-0 ms-2">Aljunito Tangaro</h6>
-                </div>
-                <p>aosfjao pap fjasop jfaso pfjasop fjasop fjajf pap 
-                    fjasop jfaso pfjasop fjasop fjajf pap fjasop jfaso
-                    pfjasop fjasop fjajf tqwtfqw</p>
-                <div class="rating">
-                    <i class="bi bi-star-fill text-warning"></i>
-                    <i class="bi bi-star-fill text-warning"></i>
-                    <i class="bi bi-star-fill text-warning"></i>
-                    <i class="bi bi-star-fill text-warning"></i>
-                    <i class="bi bi-star-fill text-warning"></i>
-                </div>
-              </div>
-              <div class="swiper-slide bg-white p-4">
-                <div class="profile d-flex align-items-center mb-3">
-                    <img src="images/trainors/johnny.jpg" width="30px">
-                    <h6 class="m-0 ms-2">Aljunito Tangaro</h6>
-                </div>
-                <p>aosfjao pap fjasop jfaso pfjasop fjasop fjajf pap 
-                    fjasop jfaso pfjasop fjasop fjajf pap fjasop jfaso
-                    pfjasop fjasop fjajf tqwtfqw</p>
-                <div class="rating">
-                    <i class="bi bi-star-fill text-warning"></i>
-                    <i class="bi bi-star-fill text-warning"></i>
-                    <i class="bi bi-star-fill text-warning"></i>
-                    <i class="bi bi-star-fill text-warning"></i>
-                    <i class="bi bi-star-fill text-warning"></i>
-                </div>
-              </div>
-              <div class="swiper-slide bg-white p-4">
-                <div class="profile d-flex align-items-center mb-3">
-                    <img src="images/trainors/johnny.jpg" width="30px">
-                    <h6 class="m-0 ms-2">Aljunito Tangaro</h6>
-                </div>
-                <p>aosfjao pap fjasop jfaso pfjasop fjasop fjajf pap 
-                    fjasop jfaso pfjasop fjasop fjajf pap fjasop jfaso
-                    pfjasop fjasop fjajf tqwtfqw</p>
-                <div class="rating">
-                    <i class="bi bi-star-fill text-warning"></i>
-                    <i class="bi bi-star-fill text-warning"></i>
-                    <i class="bi bi-star-fill text-warning"></i>
-                    <i class="bi bi-star-fill text-warning"></i>
-                    <i class="bi bi-star-fill text-warning"></i>
-                </div>
-              </div>
-
-            </div>
-            <div class="swiper-pagination"></div>
-          </div>
-    </div> 
 
     <!-- REACH US -->
 

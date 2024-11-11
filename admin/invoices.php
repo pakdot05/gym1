@@ -126,11 +126,9 @@ if (mysqli_num_rows($result) > 0) {
                     </table>
                 </div>
 
-                <!-- Analytics Chart Section -->
                 <div class="chart-container">
-                    <canvas id="analyticsChart"></canvas>
-                </div>
-
+    <canvas id="analyticsChart"></canvas>
+</div>
                 <div class="text-end mb-4">
                     <input type="text" oninput="search_user(this.value)" class="form-control shadow-none w-25 ms-auto" placeholder="Search...">
                 </div>
@@ -283,40 +281,56 @@ if (mysqli_num_rows($result) > 0) {
 
         return true; // Proceed with form submission
     }
+
         // Function to render the analytics chart
         function renderAnalyticsChart() {
-            const plans = <?= json_encode($plans) ?>; // Get plans data from PHP
-            const planNames = Object.keys(plans);
-            const planCounts = Object.values(plans);
+    const plans = <?= json_encode($plans) ?>; // Get plans data from PHP
+    const planNames = Object.keys(plans);
+    const planCounts = Object.values(plans);
 
-            const ctx = document.getElementById('analyticsChart').getContext('2d');
-            const analyticsChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: planNames,
-                    datasets: [{
-                        label: 'Number of Subscriptions',
-                        data: planCounts,
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 2,
-                        fill: false
-                    }]
-                },
-                options: {
-                    responsive: false,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
+    const ctx = document.getElementById('analyticsChart').getContext('2d');
+    const analyticsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: planNames,
+            datasets: [{
+                label: 'Number of Subscriptions',
+                data: planCounts,
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 2,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: false,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                // Add labels on top of the bars
+                datalabels: {
+                    anchor: 'end',
+                    align: 'top',
+                    formatter: function(value, context) {
+                        return context.chart.data.datasets[0].data[context.dataIndex]; // Display count
+                    },
+                    color: 'black',
+                    font: {
+                        weight: 'bold'
                     }
                 }
-            });
+            }
         }
+    });
+}
 
-        // Call the render function after the page loads
-        window.onload = renderAnalyticsChart;
+// Call the render function after the page loads
+window.onload = renderAnalyticsChart;
+
     </script>
 
     <?php require('inc/scripts.php'); ?>
