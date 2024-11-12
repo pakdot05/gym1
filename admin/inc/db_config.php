@@ -3,7 +3,7 @@
 $hname = getenv('DB_HOST');  // Database host from .env
 $uname = getenv('DB_USERNAME');  // Database username from .env
 $pass = getenv('DB_PASSWORD');  // Database password from .env
-// $db = getenv('DB_DATABASE');  // Database name from .env
+$db = getenv('DB_DATABASE');  // Database name from .env
 $port = getenv('DB_PORT');  // Database port from .env
 
 // Connect to the database
