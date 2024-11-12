@@ -1,3 +1,8 @@
+<?php
+// Start the session at the very beginning of the file
+session_start();
+// Your other code follows
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
