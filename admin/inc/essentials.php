@@ -1,6 +1,4 @@
 <?php
-session_start(); // Ensure session_start is at the very top of the file
-
 // Define paths and URLs
 define('SITE_URL', 'http://v88wgc408g08wccwg0ocwcgo.146.190.103.211.sslip.io/');
 define('ABOUT_IMG_PATH', SITE_URL . 'images/about/');
