@@ -1,8 +1,8 @@
 <?php
-session_start(); // Place session_start() at the very beginning of the file
+session_start(); // Ensure session_start is at the very top of the file
 
 // Define paths and URLs
-define('SITE_URL', 'http://v88wgc408g08wccwg0ocwcgo.146.190.103.211.sslip.io');
+define('SITE_URL', 'http://v88wgc408g08wccwg0ocwcgo.146.190.103.211.sslip.io/');
 define('ABOUT_IMG_PATH', SITE_URL . 'images/about/');
 define('CAROUSEL_IMG_PATH', SITE_URL . 'images/carousel/');
 define('TRAINORS_IMG_PATH', SITE_URL . 'images/trainors/');
@@ -17,25 +17,23 @@ define('TRAINORS_FOLDER', 'trainors/');
 // Admin login check
 function adminLogin()
 {
-    if (!(isset($_SESSION['adminLogin']) && $_SESSION['adminLogin'] == true)) {
-        header('Location: index.php'); // Use header() for proper redirection
+    if (!(isset($_SESSION['adminLogin']) && $_SESSION['adminLogin'] === true)) {
+        header('Location: index.php'); // Redirect to the login page if not logged in
         exit();
     }
 }
 
-// Redirect function (keeping it JavaScript-based, but ideally use header())
+// Redirect function (prefer header() over JavaScript for security and reliability)
 function redirect($url)
 {
-    echo "<script>
-            window.location.href='$url';
-        </script>";
-    exit;
+    header("Location: $url");
+    exit();
 }
 
-// Alert function
+// Alert function to display messages
 function alert($type, $msg)
 {
-    $bs_class = ($type == "success") ? "alert-success" : "alert-danger";
+    $bs_class = ($type === "success") ? "alert-success" : "alert-danger";
     echo <<<alert
         <div class="alert $bs_class alert-dismissible fade show custom-alert text-center" role="alert">
             <strong class="me-3">$msg</strong>
@@ -52,7 +50,7 @@ function uploadImage($image, $folder)
 
     // Check if the MIME type is valid
     if (!in_array($img_mime, $valid_mime)) {
-        return 'inv_img'; // INVALID IMAGE MIME OR FORMAT
+        return 'inv_img'; // Invalid image MIME or format
     } else {
         $ext = pathinfo($image['name'], PATHINFO_EXTENSION);
         $rname = 'IMG_' . random_int(11111, 99999) . "." . $ext;
@@ -71,11 +69,15 @@ function uploadImage($image, $folder)
 // Image delete function
 function deleteImage($image, $folder)
 {
-    if (unlink(UPLOAD_IMAGE_PATH . $folder . $image)) {
-        return true;
-    } else {
-        return false;
+    $imagePath = UPLOAD_IMAGE_PATH . $folder . $image;
+    if (file_exists($imagePath)) {
+        if (unlink($imagePath)) {
+            return true; // Image deletion successful
+        } else {
+            return false; // Failed to delete the image
+        }
     }
+    return false; // Image does not exist
 }
 
 // User image upload function
@@ -86,18 +88,17 @@ function uploadUserImage($image)
 
     // Check if the MIME type is valid
     if (!in_array($img_mime, $valid_mime)) {
-        return 'inv_img'; // INVALID IMAGE MIME OR FORMAT
+        return 'inv_img'; // Invalid image MIME or format
     } else {
-        $ext = pathinfo($image['name'], PATHINFO_EXTENSION);
-        $rname = 'IMG_' . random_int(11111, 99999) . ".jpeg";
+        $rname = 'IMG_' . random_int(11111, 99999) . ".jpeg"; // Ensure JPEG format
 
         $img_path = UPLOAD_IMAGE_PATH . USERS_FOLDER . $rname;
 
-        // Save the image without GD library
+        // Move the uploaded file to the destination path
         if (move_uploaded_file($image['tmp_name'], $img_path)) {
-            return $rname;
+            return $rname; // Image upload successful
         } else {
-            return 'upd_failed';
+            return 'upd_failed'; // Image upload failed
         }
     }
 }
