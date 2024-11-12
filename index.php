@@ -1,3 +1,7 @@
+<?php 
+    session_start(); // Move session_start to the very top
+    require('inc/links.php');
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,11 +11,6 @@
     <link rel="stylesheet"href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
 
     <!-- LINKS -->
-
-    <?php 
-        require('inc/links.php')
-    ?> 
-
     <style>
 
             .availability-form{
