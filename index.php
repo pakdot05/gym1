@@ -1,5 +1,4 @@
 <?php 
-    session_start(); // Move session_start to the very top
     require('inc/links.php');
 ?>
 <!DOCTYPE html>
