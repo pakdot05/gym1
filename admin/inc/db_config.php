@@ -1,15 +1,18 @@
 <?php
+// Fetch environment variables using getenv()
+$hname = getenv('DB_HOST');  // Database host from .env
+$uname = getenv('DB_USERNAME');  // Database username from .env
+$pass = getenv('DB_PASSWORD');  // Database password from .env
+$db = getenv('DB_DATABASE');  // Database name from .env
+$port = getenv('DB_PORT');  // Database port from .env
 
-    $hname = 'localhost';
-    $uname = 'root';
-    $pass = '';
-    $db = 'gymko';
-    $con = mysqli_connect($hname, $uname, $pass, $db);
+// Connect to the database
+$con = mysqli_connect($hname, $uname, $pass, $db, $port);
 
-    if(!$con)
-    {
-        die("Cannot connect to database.".mysqli_connect_error());
-    }
+// Check connection
+if (!$con) {
+    die("Cannot connect to database: " . mysqli_connect_error());
+}
 
     function filteration($data){
         foreach($data as $key => $value){
