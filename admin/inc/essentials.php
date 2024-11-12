@@ -1,6 +1,5 @@
 <?php
-// Start the session first to avoid session errors
-session_start();
+session_start(); // Place session_start() at the very beginning of the file
 
 // Define paths and URLs
 define('SITE_URL', 'http://v88wgc408g08wccwg0ocwcgo.146.190.103.211.sslip.io');
