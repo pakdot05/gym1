@@ -28,12 +28,52 @@
             background-color: var(--blue-hover);
             color: white !important;
         }
+
         .logo {
-        height: 50px;
-        width: 50px;
-        border-radius: 50%;
-        object-fit: cover;
-    }
+            height: 50px;
+            width: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        /* Dropdown styles */
+        .dropdown-menu {
+            width: 100%;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: var(--blue);
+            z-index: 1000;
+            display: none;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-menu li {
+            width: 100%;
+            padding: 1px;
+            box-sizing: border-box;
+        }
+
+        .dropdown-menu a {
+            color: white;
+            display: block;
+        }
+
+        .dropdown-menu a:hover {
+            background-color: var(--blue-hover);
+        }
+
+        .dropdown-menu .active {
+            background-color: var(--blue-hover);
+            color: white !important;
+        }
+
+        .dropdown-toggle::after {
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
@@ -42,11 +82,10 @@
         <a href="https://r.search.yahoo.com/_ylt=AwrKFyeq.mxmw14SbaazRwx.;_ylu=Y29sbwNzZzMEcG9zAzEEdnRpZAMEc2VjA3Ny/RV=2/RE=1718446891/RO=10/RU=https%3a%2f%2fweb.facebook.com%2fMinglanillaDentalClinic%2f/RK=2/RS=7yvecSnF0Y43YkmiECpXqcOj7po-">
             <img src="../images/logo.jpg" alt="Logo" class="logo">
         </a>
-        <a class="navbar-brand" style=" font-size: 1.2rem; font-weight: bold; text-align: center; color: white;"> Gym Samurai</a>
+        <a class="navbar-brand" style="font-size: 1.2rem; font-weight: bold; text-align: center; color: white;"> Gym Samurai</a>
     </div>
     <a href="logout.php" class="btn btn-light btn-sm">LOGOUT</a>
 </div>
-
 
 <div class="col-lg-2 ambot border-top border-3" id="dashboard-menu">
     <nav class="navbar navbar-expand-lg ambot">
@@ -60,27 +99,14 @@
                     <li class="nav-item">
                         <a id="dashboard-link" class="link" href="dashboard.php">Dashboard</a>
                     </li>
-                
                     <li class="nav-item">
                         <a id="patient-link" class="link" href="users.php">Members</a>
                     </li>
-                    <!-- <li class="nav-item">
-                        <a id="appointment-link" class="link" href="book.php">Booking</a>
-                    </li> -->
                     <li class="nav-item">
                         <a id="product-link" class="link" href="products.php">Product</a>
                     </li>
                     <li class="nav-item">
-                        <a id="patient-link" class="link" href="Product_Sales.php">Product_Sale</a>
-                    </li>
-                    <li class="nav-item">
                         <a id="trainors-link" class="link" href="trainors.php">Trainor</a>
-                    </li>
-                    <li class="nav-item">
-                        <a id="invoices-link" class="link" href="invoices.php">Invoices</a>
-                    </li>
-                    <li class="nav-item">
-                        <a id="invoices-link" class="link" href="all.php">All Invoices</a>
                     </li>
                     <li class="nav-item">
                         <a id="specialty-link" class="link" href="specialty.php">Services</a>
@@ -91,23 +117,31 @@
                     <li class="nav-item">
                         <a id="settings-link" class="link" href="settings.php">Settings</a>
                     </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button">Invoices</a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item link" href="all.php">Total Invoices</a></li>
+                            <li><a class="dropdown-item link" href="invoices.php">Subscription</a></li>
+                            <li><a class="dropdown-item link" href="product_sales.php">Sold Product</a></li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>
     </nav>
 </div>
-
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Get all navigation links
         const navLinks = document.querySelectorAll('.link');
+        const dropdownItems = document.querySelectorAll('.dropdown-item');
+        const dropdownToggle = document.querySelector('.dropdown-toggle');
+        const dropdownMenu = document.querySelector('.dropdown-menu');
+        const dropdown = document.querySelector('.nav-item.dropdown');
 
-        // Function to set the active link based on the current URL
+        // Set active link based on current URL
         function setActiveLink() {
-            // Get the current path
             const currentPath = window.location.pathname.split('/').pop();
 
-            // Loop through the links and add active class to the matching link
             navLinks.forEach(link => {
                 if (link.getAttribute('href') === currentPath) {
                     link.classList.add('active');
@@ -115,23 +149,39 @@
                     link.classList.remove('active');
                 }
             });
+
+            dropdownItems.forEach(item => {
+                if (item.getAttribute('href') === currentPath) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
         }
 
-        // Add click event listener to each link
-        navLinks.forEach(link => {
-            link.addEventListener('click', function () {
-                // Remove active class from all links
-                navLinks.forEach(link => link.classList.remove('active'));
-
-                // Add active class to the clicked link
-                this.classList.add('active');
-            });
+        // Toggle dropdown visibility
+        dropdownToggle.addEventListener('click', function (e) {
+            e.preventDefault();
+            // Toggle 'show' class on the dropdown menu
+            dropdownMenu.classList.toggle('show');
         });
 
-        // Set the active link based on the current URL when the page loads
+        // Prevent the dropdown from closing when clicking inside the dropdown
+        dropdownMenu.addEventListener('click', function (e) {
+            e.stopPropagation();
+        });
+
+        // Close the dropdown if clicked outside
+        document.addEventListener('click', function (e) {
+            if (!dropdown.contains(e.target)) {
+                dropdownMenu.classList.remove('show');
+            }
+        });
+
         setActiveLink();
     });
 </script>
+
 
 </body>
 </html>

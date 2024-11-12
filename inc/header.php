@@ -362,47 +362,57 @@ let debounceTimer;
         $('#emailFeedback').removeClass('text-success').addClass('text-danger').text(message).show();
     }
 
-    function validateEmailWithZeroBounce(email) {
-        showLoading();
-        $.ajax({
-            url: 'https://api.zerobounce.net/v2/validate',
-            type: 'GET',
-            data: {
-                api_key: '2ddf9a20975b461d887b3d92ae51c1eb', // Replace with your actual ZeroBounce API key
-                email: email
-            },
-            success: function(response) {
-                if (response.status === 'valid') {
-                    showValid();
-                } else {
-                    const errorMessage = {
-                        'invalid': 'Email is invalid. Please enter a different email.',
-                        'catch-all': 'Email may be valid but is risky.',
-                        'unknown': 'Email validation status unknown. Please double-check.',
-                        'spamtrap': 'This email address is flagged as a spam trap.'
-                    };
-                    showInvalid(errorMessage[response.status] || 'Unexpected status. Please try again later.');
-                }
-                if (response.did_you_mean) {
-                    $('#emailFeedback').append(`<br>Did you mean: <strong>${response.did_you_mean}</strong>?`);
-                }
-            },
-            error: function() {
+    const apiKeys = ['0ca93fbb272c4d3988ab3f4a7dc8a93b', '2ddf9a20975b461d887b3d92ae51c1eb'];
+let currentKeyIndex = 0;
+
+function validateEmailWithZeroBounce(email) {
+    showLoading();
+    
+    $.ajax({
+        url: 'https://api.zerobounce.net/v2/validate',
+        type: 'GET',
+        data: {
+            api_key: apiKeys[currentKeyIndex],
+            email: email
+        },
+        success: function(response) {
+            if (response.status === 'valid') {
+                showValid();
+            } else {
+                const errorMessage = {
+                    'invalid': 'Email is invalid. Please enter a different email.',
+                    'catch-all': 'Email may be valid but is risky.',
+                    'unknown': 'Email validation status unknown. Please double-check.',
+                    'spamtrap': 'This email address is flagged as a spam trap.'
+                };
+                showInvalid(errorMessage[response.status] || 'Unexpected status. Please try again later.');
+            }
+            if (response.did_you_mean) {
+                $('#emailFeedback').append(`<br>Did you mean: <strong>${response.did_you_mean}</strong>?`);
+            }
+        },
+        error: function() {
+            // Move to the next API key if available
+            if (currentKeyIndex < apiKeys.length - 1) {
+                currentKeyIndex++;
+                validateEmailWithZeroBounce(email); // Retry with the next API key
+            } else {
                 showInvalid('Failed to validate email. Please try again later.');
             }
-        });
-    }
-
-    // Attach the debounce function to the email input field
-    $('input[name="email"]').on('input', debounce(function() {
-        const email = $(this).val();
-        const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        if (!emailPattern.test(email)) {
-            showInvalid('Please enter a valid email address.');
-            return;
         }
-        validateEmailWithZeroBounce(email);
-    }, 500));
+    });
+}
+
+// Attach the debounce function to the email input field
+$('input[name="email"]').on('input', debounce(function() {
+    const email = $(this).val();
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailPattern.test(email)) {
+        showInvalid('Please enter a valid email address.');
+        return;
+    }
+    validateEmailWithZeroBounce(email);
+}, 500));
 });
 
 </script>

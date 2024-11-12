@@ -70,22 +70,24 @@ if(isset($_GET['update'])){
     $product = $select_product->fetch(PDO::FETCH_ASSOC);
 }
 
+
 if(isset($_POST['update_product'])){
-    $update_id = $_POST['update_id']; // Get the product ID from the hidden field
+    $update_id = $_POST['update_id'];
     $name = $_POST['name'];
     $price = $_POST['price'];
     $quantity = $_POST['quantity'];
+    $unit = $_POST['unit']; 
     $image = $_FILES['image']['name'];
     $image_tmp_name = $_FILES['image']['tmp_name'];
     $image_folder = '../images/'.$image;
 
     if(!empty($image)){
         move_uploaded_file($image_tmp_name, $image_folder);
-        $update_product = $conn->prepare("UPDATE `products` SET name=?, quantity=?, price=?, image=? WHERE id=?");
-        $update_product->execute([$name, $quantity, $price, $image, $update_id]);
+        $update_product = $conn->prepare("UPDATE `products` SET name=?, quantity=?, price=?, image=?, unit=? WHERE id=?");
+        $update_product->execute([$name, $quantity, $price, $image, $unit, $update_id]);
     } else {
-        $update_product = $conn->prepare("UPDATE `products` SET name=?, quantity=?, price=? WHERE id=?");
-        $update_product->execute([$name, $quantity, $price, $update_id]);
+        $update_product = $conn->prepare("UPDATE `products` SET name=?, quantity=?, price=?, unit=? WHERE id=?");
+        $update_product->execute([$name, $quantity, $price, $unit, $update_id]); 
     }
 
     header('location:products.php');
@@ -112,14 +114,13 @@ if(isset($_POST['update_product'])){
         <div class="col-lg-10 ms-auto p-4">
             <h3 class="mb-4">Manage Products</h3>
 
-            <!-- Add/Update Product Section -->
-     <!-- Add/Update Product Section -->
-<section class="add-products">
-    <!-- Button trigger modal -->
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
+   
+<section class="add-products" >
+<div class="text-end mb-4">
+    <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#addProductModal">
         Add Product
     </button>
-
+    </div>
     <!-- Modal -->
     <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
         <div class="modal-dialog">

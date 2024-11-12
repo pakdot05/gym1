@@ -123,7 +123,7 @@
                 </div>
 
                 <div class="col-lg-3 col-md-6 mb-4">
-                    <a href="completed.php" class="dashboard-link">
+                    <a href="products.php" class="dashboard-link">
                         <div class="dashboard-box">
                             <h5>Product</h5>
                             <i class="fa fa-book m-2" style="font-size:30px;"></i>

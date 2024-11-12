@@ -77,7 +77,7 @@ if (mysqli_num_rows($result) > 0) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoices</title>
+    <title>Subscription</title>
     <?php require('inc/links.php'); ?>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Include Chart.js -->
     <style>
@@ -127,17 +127,17 @@ if (mysqli_num_rows($result) > 0) {
                 </div>
 
                 <div class="chart-container">
-    <canvas id="analyticsChart"></canvas>
+
+                <canvas id="analyticsChart"></canvas>
 </div>
-                <div class="text-end mb-4">
-                    <input type="text" oninput="search_user(this.value)" class="form-control shadow-none w-25 ms-auto" placeholder="Search...">
-                </div>
-<!-- Add Subscription Button -->
 <div class="text-end mb-4">
     <button class="btn btn-dark" data-toggle="modal" data-target="#addSubscriptionModal">
         Add Subscription
     </button>
 </div>
+                <div class="text-end mb-4">
+                    <input type="text" oninput="search_user(this.value)" class="form-control shadow-none w-25 ms-auto" placeholder="Search...">
+                </div>
 
 <div class="modal fade" id="addSubscriptionModal" tabindex="-1" role="dialog" aria-labelledby="addSubscriptionModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -327,6 +327,34 @@ if (mysqli_num_rows($result) > 0) {
         }
     });
 }
+function search_user(searchTerm) {
+    const table = document.getElementById('gymTable');
+    const rows = table.getElementsByTagName('tr');
+
+    // Loop through each row in the table
+    for (let i = 1; i < rows.length; i++) {
+        const cells = rows[i].getElementsByTagName('td');
+        let matchFound = false;
+
+        // Loop through each cell in the row
+        for (let j = 0; j < cells.length; j++) {
+            const cellValue = cells[j].textContent.toLowerCase();
+            if (cellValue.includes(searchTerm.toLowerCase())) {
+                matchFound = true;
+                break;
+            }
+        }
+
+        // Show or hide the row based on the match
+        rows[i].style.display = matchFound ? '' : 'none';
+    }
+}
+
+// Add event listener to the search input field
+const searchInput = document.querySelector('input[oninput="search_user(this.value)"]');
+searchInput.addEventListener('input', function() {
+    search_user(this.value);
+});
 
 // Call the render function after the page loads
 window.onload = renderAnalyticsChart;

@@ -6,10 +6,16 @@ require('inc/essentials.php');
 $search_query = "";
 
 // Check if there's a search query (from AJAX or form submission)
-if (isset($_GET['search'])) {
-    $search_query = trim($_GET['search']);  // Get the search input and sanitize it
+if (isset($_GET['ajax_search'])) {
+    $orders_data = []; // Array to hold order data
+    if (count($orders) > 0) {
+        foreach ($orders as $order) {
+            $orders_data[] = $order; // Add order data to the array
+        }
+    }
+    echo json_encode($orders_data); // Send the order data as JSON
+    exit();
 }
-
 // Fetch orders from the database with optional search filtering
 $query = "SELECT o.order_id, o.product_name, o.quantity, o.payment_status, 
                  o.address, u.name AS user_name, o.payment_method, o.price ,o.claimed
@@ -189,7 +195,7 @@ if (isset($_POST['delete_order'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoices</title>
+    <title>Sold Product</title>
     <?php require('inc/links.php'); ?>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -200,15 +206,16 @@ if (isset($_POST['delete_order'])) {
 
     // AJAX search function
     function search_user(query) {
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", "product_sales.php?ajax_search=1&search=" + query, true);
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-                document.getElementById("ordersTableBody").innerHTML = xhr.responseText;
-            }
-        };
-        xhr.send();
-    }
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "product_sales.php?ajax_search=1&search=" + query, true);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            var ordersData = JSON.parse(xhr.responseText); // Parse the JSON response
+            updateOrdersTable(ordersData); // Update the table with the search results
+        }
+    };
+    xhr.send();
+}
 
     // Payment Modal
     var paymentModal = document.getElementById('paymentModal');
