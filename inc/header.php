@@ -1,15 +1,16 @@
 <?php
-// Assuming the 'select' function is included/defined above
+// Assuming the 'select' function is defined in your db_connection.php file
+
+// Example for fetching contact details
 $contact_q = "SELECT * FROM `contact_details` WHERE `contact_id`=?";
 $values = [1];
 $contact_r = mysqli_fetch_assoc(select($contact_q, $values, 'i'));  // Use select() to fetch data
 
+// Example for fetching settings details
 $contact_q = "SELECT * FROM `settings` WHERE `settings_id`=?";
 $values = [1];
 $contact_s = mysqli_fetch_assoc(select($contact_q, $values, 'i'));  // Use select() to fetch data
 ?>
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
