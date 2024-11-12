@@ -1,6 +1,3 @@
-<?php 
-    require('inc/links.php');
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
