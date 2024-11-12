@@ -135,18 +135,33 @@ function sendSmsNotification($phoneNumber) {
 if (isset($_POST['login'])) {
     $data = filteration($_POST);
 
+    // Validate empty fields
+    if (empty($data['email_mob']) || empty($data['pass'])) {
+        echo 'empty_fields';
+        error_log('Login attempt with empty email/phone or password.');
+        exit;
+    }
+
+    // Check if user exists
     $u_exist = select("SELECT * FROM `user_cred` WHERE `email` = ? OR `phonenum` = ? LIMIT 1", [$data['email_mob'], $data['email_mob']], "ss");
 
     if (mysqli_num_rows($u_exist) == 0) {
-        echo 'inv_email_mob';
+        echo 'inv_email_mob'; // User not found
+        error_log("Login failed - user not found with email/phone: " . $data['email_mob']);
     } else {
         $u_fetch = mysqli_fetch_assoc($u_exist);
+
+        // Check if the user account is inactive
         if ($u_fetch['status'] == 0) {
-            echo 'inactive';
+            echo 'inactive'; // Account is inactive
+            error_log("Login attempt for inactive user ID: " . $u_fetch['user_id']);
         } else {
+            // Verify password
             if (!password_verify($data['pass'], $u_fetch['password'])) {
-                echo 'invalid_pass';
+                echo 'invalid_pass'; // Incorrect password
+                error_log("Invalid password attempt for user ID: " . $u_fetch['user_id']);
             } else {
+                // Start session and set user session data
                 session_start();
                 $_SESSION['login'] = true;
                 $_SESSION['uId'] = $u_fetch['user_id'];
@@ -157,9 +172,10 @@ if (isset($_POST['login'])) {
                 $_SESSION['uDob'] = $u_fetch['dob'];
                 $_SESSION['uAdd'] = $u_fetch['address'];
 
-                echo 1;
+                echo 1; // Login successful
             }
         }
     }
 }
+
 ?>
