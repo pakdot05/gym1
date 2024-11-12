@@ -5,9 +5,6 @@
 <link rel="stylesheet" href="css/common.css">
 
 <?php
-
-    session_start();
-
     require('admin/inc/db_config.php');
     require('admin/inc/essentials.php');
 
