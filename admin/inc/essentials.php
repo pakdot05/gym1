@@ -1,20 +1,14 @@
 <?php
-
-    //FRONT END PURPOSE
-
     define('SITE_URL','http://v88wgc408g08wccwg0ocwcgo.146.190.103.211.sslip.io');
     define('ABOUT_IMG_PATH',SITE_URL.'images/about/');
     define('CAROUSEL_IMG_PATH',SITE_URL.'images/carousel/');
     define('TRAINORS_IMG_PATH',SITE_URL.'images/trainors/');
-    
     //BACK END PURPOSE
-
     define('UPLOAD_IMAGE_PATH',$_SERVER['DOCUMENT_ROOT'].'/gymko/images/');
     define('ABOUT_FOLDER','about/');
     define('CAROUSEL_FOLDER','carousel/');
     define('USERS_FOLDER','users/');
     define('TRAINORS_FOLDER','trainors/');
-
     function adminLogin()
     {
         session_start();
@@ -25,7 +19,6 @@
             exit;
         }
     }
-
     function redirect($url)
     {
         echo"<script>
@@ -33,7 +26,6 @@
         </script>";
         exit;
     }
-
     function alert($type,$msg)
     {
         $bs_class = ($type == "success") ? "alert-success" : "alert-danger";
@@ -44,7 +36,6 @@
             </div>
         alert;
     }
-
 function uploadImage($image, $folder)
 {
     $valid_mime = ['image/jpeg', 'image/png', 'image/webp'];
@@ -67,7 +58,6 @@ function uploadImage($image, $folder)
         }
     }
 }
-
     function deleteImage($image,$folder)
     {
         if(unlink(UPLOAD_IMAGE_PATH.$folder.$image)){
