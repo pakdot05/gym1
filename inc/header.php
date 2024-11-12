@@ -1,6 +1,4 @@
 <?php
-require_once('admin/inc/db_config.php'); // Adjust the path to where your db_connection.php is located
-
 // Example for fetching contact details
 $contact_q = "SELECT * FROM `contact_details` WHERE `contact_id`=?";
 $values = [1];
@@ -19,9 +17,7 @@ $contact_s = mysqli_fetch_assoc(select($contact_q, $values, 'i'));  // Use selec
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-<?php 
-    require('inc/links.php');
-?>
+
     <style>
 
         .dropdown-item.active{
